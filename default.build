@@ -1,0 +1,73 @@
+<project name="ActiveLucene.Net" default="build" basedir=".">
+  
+	<description>${project::get-name()}</description>
+
+	<!-- Properties -->
+  <property name="solution.path" value="src\ActiveLucene.Net.sln"/>
+	<property name="lib.dir" value="${project::get-base-directory()}\\lib"/>
+	<property name="build.dir" value="${project::get-base-directory()}\\build\\"/>
+	<property name="out.dir" value="${build.dir}\\bin\\"/>
+	<property name="dist.dir" value="${build.dir}\\dist\\"/>
+	<property name="product.version" value="1.0.0.0"/>
+
+  <loadfile file="build.number" property="product.version"/>
+  
+  <loadtasks assembly="${lib.dir}\nantcontrib\NAnt.Contrib.Tasks.dll"/>
+  
+	<target name="clean" description="remove all generated files">
+		<msbuild project="${solution.path}" target="clean" failonerror="false">
+		  <property name="OutDir" value="${out.dir}"/>
+		  <property name="Configuration" value="Release" />
+		</msbuild>
+		<delete dir="${build.dir}" failonerror="false"/>
+	</target>
+
+
+	<target name="compile" description="compiles the source code">
+		<msbuild project="${solution.path}" target="build">
+		  <property name="OutDir" value="${out.dir}"/>
+		  <property name="Configuration" value="Release" />
+		</msbuild>
+	</target>
+
+	<target name="package">
+		<mkdir dir="${dist.dir}" />
+		<zip zipfile="${dist.dir}${project::get-name()}_${product.version}.zip">
+			<fileset basedir="${build.dir}">
+				<include name="**/*" />
+			</fileset>
+		</zip>
+	</target>
+
+  <target name="update-assembly-version">
+    <version startdate="4/6/2010" prefix="product"/>
+    <echo message=""/>
+    <foreach item="File" property="filename">
+      <in>
+        <items>
+          <include name="**/AssemblyInfo.cs"/>
+        </items>
+      </in>
+      <do>
+        <asminfo output="${filename}" language="CSharp">
+          <imports>
+            <import namespace="System.Reflection"/>
+            <import namespace="System.Runtime.CompilerServices"/>
+            <import namespace="System.Runtime.InteropServices"/>
+          </imports>
+          <attributes>
+            <attribute type="AssemblyProductAttribute" value="${project::get-name()}"/>
+            <attribute type="AssemblyCopyrightAttribute" value="Copyright ©  2010"/>
+            <attribute type="AssemblyVersionAttribute" value="${product.version}"/>
+            <attribute type="AssemblyFileVersionAttribute" value="${product.version}"/>
+            <attribute type="AssemblyInformationalVersionAttribute" value="${product.major}.${product.minor}"/>
+          </attributes>
+        </asminfo>
+      </do>
+    </foreach>
+  </target>
+  
+	<target name="build" depends="clean,compile,package"/>
+
+  <target name="release" depends="clean,update-assembly-version,compile,package"/>
+</project>
