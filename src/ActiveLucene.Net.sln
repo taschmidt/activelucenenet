@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IndexManagerTester", "IndexManagerTester\IndexManagerTester.csproj", "{B27AFE6A-8DD0-4397-BBB4-4C9FE9AB7EF5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiveLucene.Net", "ActiveLucene.Net\ActiveLucene.Net.csproj", "{B0D7D075-22B8-4965-AE89-0A0E8423A15C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiveLucene.Net.Tests", "ActiveLucene.Net.Tests\ActiveLucene.Net.Tests.csproj", "{0D951B40-2581-4BB5-A979-17C1ABE900DF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B27AFE6A-8DD0-4397-BBB4-4C9FE9AB7EF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B27AFE6A-8DD0-4397-BBB4-4C9FE9AB7EF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B27AFE6A-8DD0-4397-BBB4-4C9FE9AB7EF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B27AFE6A-8DD0-4397-BBB4-4C9FE9AB7EF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0D7D075-22B8-4965-AE89-0A0E8423A15C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0D7D075-22B8-4965-AE89-0A0E8423A15C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0D7D075-22B8-4965-AE89-0A0E8423A15C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0D7D075-22B8-4965-AE89-0A0E8423A15C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D951B40-2581-4BB5-A979-17C1ABE900DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D951B40-2581-4BB5-A979-17C1ABE900DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D951B40-2581-4BB5-A979-17C1ABE900DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D951B40-2581-4BB5-A979-17C1ABE900DF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
