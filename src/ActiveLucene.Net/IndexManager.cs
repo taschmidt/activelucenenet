@@ -28,10 +28,10 @@ namespace ActiveLucene.Net
 {
     public interface IIndexManager
     {
-        void BeginRebuildRepository();
-        void RebuildRepository();
+        void BeginRebuildRepository(object state);
+        void RebuildRepository(object state);
 
-        event Action<IndexWriter> OnRebuildRepository;
+        event Action<IndexWriter, object> OnRebuildRepository;
         event Action<IndexSearcher> OnWarmUpIndex;
 
         bool IsOpen { get; }
@@ -75,19 +75,19 @@ namespace ActiveLucene.Net
             _readOnly = readOnly;
         }
 
-        public void BeginRebuildRepository()
+        public void BeginRebuildRepository(object state)
         {
-            var dlg = new Action(RebuildRepository);
-            dlg.BeginInvoke(EndRebuildRepository, dlg);
+            var dlg = new Action<object>(RebuildRepository);
+            dlg.BeginInvoke(state, EndRebuildRepository, dlg);
         }
 
         protected static void EndRebuildRepository(IAsyncResult ar)
         {
-            var dlg = ar.AsyncState as Action;
+            var dlg = ar.AsyncState as Action<object>;
             dlg.EndInvoke(ar);
         }
 
-        public void RebuildRepository()
+        public void RebuildRepository(object state)
         {
             if(OnRebuildRepository == null)
                 return;
@@ -103,7 +103,7 @@ namespace ActiveLucene.Net
 
                 try
                 {
-                    OnRebuildRepository(indexWriter);
+                    OnRebuildRepository(indexWriter, state);
                 }
                 catch(Exception ex)
                 {
@@ -124,7 +124,7 @@ namespace ActiveLucene.Net
             }
         }
 
-        public event Action<IndexWriter> OnRebuildRepository;
+        public event Action<IndexWriter, object> OnRebuildRepository;
         public event Action<IndexSearcher> OnWarmUpIndex;
 
         public bool IsOpen

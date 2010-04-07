@@ -67,13 +67,13 @@ namespace ActiveLucene.Net.Tests
         public void CanRebuildRepository()
         {
             var indexManager = GetOpenIndexManager();
-            indexManager.OnRebuildRepository += delegate(IndexWriter indexWriter)
+            indexManager.OnRebuildRepository += delegate(IndexWriter indexWriter, object state)
                                                     {
                                                         var doc = new Document();
                                                         doc.Add(new Field("rebuilding", "yes", Field.Store.YES, Field.Index.NOT_ANALYZED));
                                                         indexWriter.AddDocument(doc);
                                                     };
-            indexManager.RebuildRepository();
+            indexManager.RebuildRepository(null);
             Assert.True(indexManager.CurrentIndexPath.EndsWith("2"));
 
             using(var indexSearcher = indexManager.GetIndexSearcher())
@@ -144,11 +144,11 @@ namespace ActiveLucene.Net.Tests
 
             Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));
 
-            indexManager.OnRebuildRepository += delegate(IndexWriter writer)
+            indexManager.OnRebuildRepository += delegate
                                                     {
                                                         throw new Exception("Test");
                                                     };
-            indexManager.RebuildRepository();
+            indexManager.RebuildRepository(null);
 
             Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));
 
