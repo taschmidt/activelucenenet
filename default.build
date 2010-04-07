@@ -1,42 +1,44 @@
 <project name="ActiveLucene.Net" default="build" basedir=".">
-  
-	<!-- Properties -->
+
+  <!-- Properties -->
   <property name="solution.path" value="src\ActiveLucene.Net.sln"/>
-	<property name="lib.dir" value="${project::get-base-directory()}\lib"/>
-	<property name="build.dir" value="${project::get-base-directory()}\build"/>
-	<property name="out.dir" value="${build.dir}\bin"/>
-	<property name="dist.dir" value="${build.dir}\dist"/>
+  <property name="lib.dir" value="${project::get-base-directory()}\lib"/>
+  <property name="build.dir" value="${project::get-base-directory()}\build"/>
+  <property name="out.dir" value="${build.dir}\bin"/>
+  <property name="dist.dir" value="${build.dir}\dist"/>
   <property name="tests.dir" value="${build.dir}\tests"/>
-	<property name="product.version" value="1.0.0.0"/>
+  <property name="product.version" value="1.0.0.0"/>
 
   <loadfile file="build.number" property="product.version"/>
-  
+
   <loadtasks assembly="${lib.dir}\nantcontrib\NAnt.Contrib.Tasks.dll"/>
 
-	<target name="clean" description="remove all generated files">
-		<msbuild project="${solution.path}" target="clean">
-		  <property name="OutDir" value="${out.dir}\\"/>
-		  <property name="Configuration" value="Release" />
-		</msbuild>
-		<delete dir="${build.dir}" failonerror="false"/>
-	</target>
+  <target name="clean" description="remove all generated files">
+    <msbuild project="${solution.path}" target="clean">
+      <property name="OutDir" value="${out.dir}\\"/>
+      <property name="Configuration" value="Release" />
+    </msbuild>
+    <delete dir="${build.dir}" failonerror="false"/>
+  </target>
 
 
-	<target name="compile" description="compiles the source code">
-		<msbuild project="${solution.path}" target="build">
-		  <property name="OutDir" value="${out.dir}\\"/>
-		  <property name="Configuration" value="Release" />
-		</msbuild>
-	</target>
+  <target name="compile" description="compiles the source code">
+    <msbuild project="${solution.path}" target="build">
+      <property name="OutDir" value="${out.dir}\\"/>
+      <property name="Configuration" value="Release" />
+    </msbuild>
+  </target>
 
-	<target name="package">
-		<mkdir dir="${dist.dir}" />
-		<zip zipfile="${dist.dir}\${project::get-name()}_${product.version}.zip">
-			<fileset basedir="${build.dir}">
-				<include name="**/*" />
-			</fileset>
-		</zip>
-	</target>
+  <target name="package">
+    <mkdir dir="${dist.dir}" />
+    <zip zipfile="${dist.dir}\${project::get-name()}_${product.version}.zip">
+      <fileset basedir="${build.dir}">
+        <include name="bin\*"/>
+        <exclude name="bin\*Tests*"/>
+        <exclude name="bin\*nunit*"/>
+      </fileset>
+    </zip>
+  </target>
 
   <target name="update-assembly-version">
     <version startdate="4/6/2010" prefix="product"/>
@@ -77,8 +79,8 @@
       <formatter type="Xml" extension=".xml" usefile="true" outputdir="${tests.dir}"/>
     </nunit2>
   </target>
-  
-	<target name="build" depends="clean,compile,package,test"/>
+
+  <target name="build" depends="clean,compile,package,test"/>
 
   <target name="release" depends="clean,update-assembly-version,compile,package,test"/>
 </project>

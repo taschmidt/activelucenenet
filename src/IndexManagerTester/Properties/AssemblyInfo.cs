@@ -14,7 +14,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyProductAttribute("ActiveLucene.Net")]
 [assembly: AssemblyCopyrightAttribute("Copyright ©  2010")]
-[assembly: AssemblyVersionAttribute("0.1.6.6233")]
-[assembly: AssemblyFileVersionAttribute("0.1.6.6233")]
+[assembly: AssemblyVersionAttribute("0.1.6.7371")]
+[assembly: AssemblyFileVersionAttribute("0.1.6.7371")]
 [assembly: AssemblyInformationalVersionAttribute("0.1")]
 
