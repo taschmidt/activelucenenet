@@ -1,22 +1,21 @@
 <project name="ActiveLucene.Net" default="build" basedir=".">
   
-	<description>${project::get-name()}</description>
-
 	<!-- Properties -->
   <property name="solution.path" value="src\ActiveLucene.Net.sln"/>
-	<property name="lib.dir" value="${project::get-base-directory()}\\lib"/>
-	<property name="build.dir" value="${project::get-base-directory()}\\build\\"/>
-	<property name="out.dir" value="${build.dir}\\bin\\"/>
-	<property name="dist.dir" value="${build.dir}\\dist\\"/>
+	<property name="lib.dir" value="${project::get-base-directory()}\lib"/>
+	<property name="build.dir" value="${project::get-base-directory()}\build"/>
+	<property name="out.dir" value="${build.dir}\bin"/>
+	<property name="dist.dir" value="${build.dir}\dist"/>
+  <property name="tests.dir" value="${build.dir}\tests"/>
 	<property name="product.version" value="1.0.0.0"/>
 
   <loadfile file="build.number" property="product.version"/>
   
   <loadtasks assembly="${lib.dir}\nantcontrib\NAnt.Contrib.Tasks.dll"/>
-  
+
 	<target name="clean" description="remove all generated files">
-		<msbuild project="${solution.path}" target="clean" failonerror="false">
-		  <property name="OutDir" value="${out.dir}"/>
+		<msbuild project="${solution.path}" target="clean">
+		  <property name="OutDir" value="${out.dir}\\"/>
 		  <property name="Configuration" value="Release" />
 		</msbuild>
 		<delete dir="${build.dir}" failonerror="false"/>
@@ -25,14 +24,14 @@
 
 	<target name="compile" description="compiles the source code">
 		<msbuild project="${solution.path}" target="build">
-		  <property name="OutDir" value="${out.dir}"/>
+		  <property name="OutDir" value="${out.dir}\\"/>
 		  <property name="Configuration" value="Release" />
 		</msbuild>
 	</target>
 
-	<target name="package">
+	<target name="package" depends="test">
 		<mkdir dir="${dist.dir}" />
-		<zip zipfile="${dist.dir}${project::get-name()}_${product.version}.zip">
+		<zip zipfile="${dist.dir}\${project::get-name()}_${product.version}.zip">
 			<fileset basedir="${build.dir}">
 				<include name="**/*" />
 			</fileset>
@@ -45,7 +44,7 @@
     <foreach item="File" property="filename">
       <in>
         <items>
-          <include name="**/AssemblyInfo.cs"/>
+          <include name="src\**\AssemblyInfo.cs"/>
         </items>
       </in>
       <do>
@@ -65,6 +64,18 @@
         </asminfo>
       </do>
     </foreach>
+  </target>
+
+  <target name="test">
+    <nunit2 verbose="true">
+      <test>
+        <assemblies>
+          <include name="${out.dir}\*.Tests.dll"/>
+        </assemblies>
+      </test>
+      <formatter type="Plain"/>
+      <formatter type="Xml" extension=".xml" usefile="true" outputdir="${tests.dir}"/>
+    </nunit2>
   </target>
   
 	<target name="build" depends="clean,compile,package"/>
