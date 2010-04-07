@@ -29,7 +29,7 @@
 		</msbuild>
 	</target>
 
-	<target name="package" depends="test">
+	<target name="package">
 		<mkdir dir="${dist.dir}" />
 		<zip zipfile="${dist.dir}\${project::get-name()}_${product.version}.zip">
 			<fileset basedir="${build.dir}">
@@ -78,7 +78,7 @@
     </nunit2>
   </target>
   
-	<target name="build" depends="clean,compile,package"/>
+	<target name="build" depends="clean,compile,package,test"/>
 
-  <target name="release" depends="clean,update-assembly-version,compile,package"/>
+  <target name="release" depends="clean,update-assembly-version,compile,package,test"/>
 </project>
