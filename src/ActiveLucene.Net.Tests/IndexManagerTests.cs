@@ -29,6 +29,13 @@ namespace ActiveLucene.Net.Tests
         private readonly string _basePath = Path.Combine(Environment.CurrentDirectory, "index");
         private readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
+        private IndexManager GetOpenIndexManager()
+        {
+            var indexManager = new IndexManager(_basePath, _analyzer, false);
+            indexManager.Open();
+            return indexManager;
+        }
+
         [SetUp]
         public void Init()
         {
@@ -46,8 +53,7 @@ namespace ActiveLucene.Net.Tests
         [Test]
         public void CanAddDocuments()
         {
-            var indexManager = new IndexManager(_basePath, _analyzer, false);
-            indexManager.Open();
+            var indexManager = GetOpenIndexManager();
             using(var indexWriter = indexManager.GetIndexWriter())
             {
                 indexWriter.AddDocument(new Document());
@@ -60,8 +66,7 @@ namespace ActiveLucene.Net.Tests
         [Test]
         public void CanRebuildRepository()
         {
-            var indexManager = new IndexManager(_basePath, _analyzer, false);
-            indexManager.Open();
+            var indexManager = GetOpenIndexManager();
             indexManager.OnRebuildRepository += delegate(IndexWriter indexWriter)
                                                     {
                                                         var doc = new Document();
@@ -127,6 +132,50 @@ namespace ActiveLucene.Net.Tests
                 Assert.AreEqual(obj.Data, "foo");
                 Assert.AreEqual(obj.Data2, "bar");
             }
+
+            indexManager.Close();
+        }
+
+        [Test]
+        public void CanHandleExceptionDuringRebuild()
+        {
+            var indexManager = new IndexManager(_basePath, _analyzer, false);
+            indexManager.Open();
+
+            Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));
+
+            indexManager.OnRebuildRepository += delegate(IndexWriter writer)
+                                                    {
+                                                        throw new Exception("Test");
+                                                    };
+            indexManager.RebuildRepository();
+
+            Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));
+
+            indexManager.Close();
+        }
+
+        [Test]
+        public void CanGetIndexCount()
+        {
+            var indexManager = GetOpenIndexManager();
+            using(var writer = indexManager.GetIndexWriter())
+            {
+                writer.AddDocument(new Document());
+            }
+
+            var indexCount = indexManager.GetIndexCount();
+            Assert.AreEqual(indexCount, 1);
+
+            indexManager.Close();
+        }
+
+        [Test]
+        public void CanGetIndexSize()
+        {
+            var indexManager = GetOpenIndexManager();
+            var indexSize = indexManager.GetIndexSize();
+            Assert.IsTrue(indexSize > 0);
 
             indexManager.Close();
         }

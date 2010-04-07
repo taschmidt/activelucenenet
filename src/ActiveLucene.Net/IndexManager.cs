@@ -14,12 +14,15 @@
 
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Lucene.Net.Analysis;
+using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Directory = System.IO.Directory;
+using Version = Lucene.Net.Util.Version;
 
 namespace ActiveLucene.Net
 {
@@ -33,6 +36,8 @@ namespace ActiveLucene.Net
 
         bool IsOpen { get; }
         string CurrentIndexPath { get; }
+        int GetIndexCount();
+        long GetIndexSize();
 
         void Open();
         void Open(bool alwaysCreate);
@@ -53,6 +58,9 @@ namespace ActiveLucene.Net
         protected readonly Analyzer _analyzer;
         protected readonly bool _readOnly;
         protected LockableIndexSearcher _indexSearcher;
+
+        public IndexManager(string basePath) : this(basePath, new StandardAnalyzer(Version.LUCENE_CURRENT), false)
+        {}
 
         public IndexManager(string basePath, Analyzer analyzer) : this(basePath, analyzer, false)
         {}
@@ -93,8 +101,19 @@ namespace ActiveLucene.Net
                 var indexWriter = new IndexWriter(FSDirectory.Open(new DirectoryInfo(buildingPath)),
                                                   _analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
 
-                OnRebuildRepository(indexWriter);
-                
+                try
+                {
+                    OnRebuildRepository(indexWriter);
+                }
+                catch(Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex);
+                    indexWriter.Close();
+                    CleanUpDirectories();
+                    return;
+                }
+
+                indexWriter.Optimize();
                 indexWriter.Close();
                 Directory.Move(buildingPath, NextHighestNumberedFolder());
                 OpenBestRepository();
@@ -111,6 +130,23 @@ namespace ActiveLucene.Net
         public bool IsOpen
         {
             get { return _indexSearcher != null; }
+        }
+
+        public int GetIndexCount()
+        {
+            using(var searcher = GetIndexSearcher())
+            {
+                return searcher.MaxDoc();
+            }
+        }
+
+        public long GetIndexSize()
+        {
+            using(var searcher = GetIndexSearcher())
+            {
+                var directory = searcher.GetIndexReader().Directory();
+                return directory.ListAll().Sum(file => new FileInfo(Path.Combine(CurrentIndexPath, file)).Length);
+            }
         }
 
         public void Open()
