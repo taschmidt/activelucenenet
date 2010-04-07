@@ -133,16 +133,20 @@ namespace ActiveLucene.Net
 
             var compilerParams = new CompilerParameters(new[]
                                                             {
-                                                                "Lucene.Net.dll",
                                                                 "System.Core.dll",
 
+                                                                // add Lucene assembly
+                                                                typeof(Document).Assembly.Location,
+
                                                                 // add this assembly
-                                                                typeof (LuceneFieldHandlerGenerator<>).Assembly.GetName()
-                                                                    .Name + ".dll",
+                                                                typeof (LuceneFieldHandlerGenerator<>).Assembly.Location,
 
                                                                 // add the referenced type's assembly
-                                                                typeof (T).Assembly.GetName().Name + ".dll"
-                                                            });
+                                                                typeof (T).Assembly.Location
+                                                            })
+                                     {
+                                         CompilerOptions = "/optimize"
+                                     };
 
             var compilerResults = prov.CompileAssemblyFromSource(compilerParams, sb.ToString());
             if(compilerResults.Errors.HasErrors)
