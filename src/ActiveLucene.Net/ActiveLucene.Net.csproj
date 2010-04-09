@@ -51,8 +51,10 @@
   <ItemGroup>
     <Compile Include="DisposableIndexSearcher.cs" />
     <Compile Include="DisposableIndexWriter.cs" />
+    <Compile Include="FieldHandler\FieldHandlerContextBase.cs" />
+    <Compile Include="FieldHandler\StringFieldHandlerContext.cs" />
     <Compile Include="IndexManager.cs" />
-    <Compile Include="LuceneFieldHandlerGenerator.cs" />
+    <Compile Include="FieldHandler\FieldHandlerGenerator.cs" />
     <Compile Include="LuceneHelpers.cs" />
     <Compile Include="LuceneMediator.cs" />
     <Compile Include="LockableIndexSearcher.cs" />
