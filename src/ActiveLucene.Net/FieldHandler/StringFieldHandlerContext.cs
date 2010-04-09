@@ -12,23 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using ActiveLucene.Net.FieldHandler;
 using Lucene.Net.Documents;
 
-namespace ActiveLucene.Net
+namespace ActiveLucene.Net.FieldHandler
 {
-    public static class LuceneMediator<T> where T : class
+    public class StringFieldHandlerContext : FieldHandlerContextBase<string>
     {
-        private static readonly IFieldHandler<T> _fieldHandler = FieldHandlerGenerator<T>.Create();
+        private readonly Field _field;
 
-        public static void Set(Document doc, T record)
+        public StringFieldHandlerContext(FieldHandlerConfiguration config) : base(config)
         {
-            _fieldHandler.Set(doc, record);
+            _field = new Field(Configuration.Name, "", Configuration.Store, Configuration.Index);
         }
 
-        public static T Get(Document doc)
+        public override string GetValue(Document document)
         {
-            return _fieldHandler.Get(doc);
+            return document.Get(Configuration.Name);
+        }
+
+        public override void SetFields(Document document, string value)
+        {
+            _field.SetValue(value);
+            document.Add(_field);
         }
     }
 }
