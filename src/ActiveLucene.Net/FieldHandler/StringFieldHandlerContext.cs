@@ -18,21 +18,14 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public class StringFieldHandlerContext : FieldHandlerContextBase<string>
     {
-        private Field _field;
-
-        public override void Init()
+        public override string StringToValue(string value)
         {
-            _field = new Field(Configuration.Name, "", Configuration.Store, Configuration.Index);
+            return value;
         }
 
-        public override string GetValue(Document document)
+        public override string ValueToString(string value)
         {
-            return document.Get(Configuration.Name);
-        }
-
-        public override void SetFields(Document document, string value)
-        {
-            document.Add(_field.Set(value));
+            return value;
         }
     }
 }

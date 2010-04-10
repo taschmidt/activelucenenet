@@ -19,21 +19,14 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public class DateTimeFieldHandlerContext : FieldHandlerContextBase<DateTime>
     {
-        private Field _field;
-
-        public override void Init()
+        public override DateTime StringToValue(string value)
         {
-            _field = new Field(Configuration.Name, "", Configuration.Store, Configuration.Index);
+            return DateTools.StringToDate(value);
         }
 
-        public override DateTime GetValue(Document document)
+        public override string ValueToString(DateTime value)
         {
-            return IfNotNull(document.Get(Configuration.Name), DateTools.StringToDate);
-        }
-
-        public override void SetFields(Document document, DateTime value)
-        {
-            document.Add(_field.Set(DateTools.DateToString(value, Configuration.DateResolution)));
+            return DateTools.DateToString(value, Configuration.DateResolution);
         }
     }
 }

@@ -51,14 +51,14 @@
   <ItemGroup>
     <Compile Include="DisposableIndexSearcher.cs" />
     <Compile Include="DisposableIndexWriter.cs" />
+    <Compile Include="FieldHandler\ArrayFieldHandlerContext.cs" />
     <Compile Include="FieldHandler\DateTimeFieldHandlerContext.cs" />
-    <Compile Include="FieldHandler\DoubleFieldHandlerContext.cs" />
     <Compile Include="FieldHandler\FieldHandlerConfiguration.cs" />
     <Compile Include="FieldHandler\FieldHandlerContextBase.cs" />
-    <Compile Include="FieldHandler\FloatFieldHandlerContext.cs" />
-    <Compile Include="FieldHandler\IntFieldHandlerContext.cs" />
+    <Compile Include="FieldHandler\FieldHandlerHelpers.cs" />
+    <Compile Include="FieldHandler\IFieldHandlerContext.cs" />
     <Compile Include="FieldHandler\GenericFieldHandlerContext.cs" />
-    <Compile Include="FieldHandler\LongFieldHandlerContext.cs" />
+    <Compile Include="FieldHandler\ListFieldHandlerContext.cs" />
     <Compile Include="FieldHandler\StringFieldHandlerContext.cs" />
     <Compile Include="IndexManager.cs" />
     <Compile Include="FieldHandler\FieldHandlerGenerator.cs" />

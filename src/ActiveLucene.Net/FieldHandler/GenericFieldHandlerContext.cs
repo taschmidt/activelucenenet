@@ -13,27 +13,24 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net.FieldHandler
 {
     public class GenericFieldHandlerContext<T> : FieldHandlerContextBase<T>
     {
-        private Field _field;
-
-        public override void Init()
+        public override T StringToValue(string value)
         {
-            _field = new Field(Configuration.Name, "", Configuration.Store, Configuration.Index);
+            return (T) Convert.ChangeType(value, typeof (T));
         }
 
-        public override T GetValue(Document document)
+        public override string ValueToString(T value)
         {
-            return IfNotNull(document.Get(Configuration.Name), str => (T) Convert.ChangeType(str, typeof (T)));
-        }
+            if (value is ValueType)
+                return value.ToString();
 
-        public override void SetFields(Document document, T value)
-        {
-            document.Add(_field.Set(value.ToString()));
+            return value != null ? value.ToString() : null;
         }
     }
 }

@@ -16,6 +16,7 @@ using System;
 using System.Linq;
 using Lucene.Net.Documents;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 namespace ActiveLucene.Net.Tests
 {
@@ -23,18 +24,7 @@ namespace ActiveLucene.Net.Tests
     public class LuceneMediatorTests
     {
         [Test]
-        public void CanSetFields()
-        {
-            var obj = new TestRecord { Data = "foo", Data2 = "bar" };
-            var doc = LuceneMediator<TestRecord>.ToDocument(obj);
-
-            Assert.AreEqual(doc.GetFields().Count, 2);
-            Assert.AreEqual(doc.Get("data"), "foo");
-            Assert.AreEqual(doc.Get("data2"), "bar");
-        }
-
-        [Test]
-        public void CanGetFields()
+        public void CheckStringFields()
         {
             var obj = new TestRecord { Data = "foo", Data2 = "bar" };
             var doc = LuceneMediator<TestRecord>.ToDocument(obj);
@@ -45,31 +35,7 @@ namespace ActiveLucene.Net.Tests
         }
 
         [Test]
-        public void CanSetNumericFields()
-        {
-            var obj = new NumericRecord
-                          {
-                              IntField = 1,
-                              LongField = 2,
-                              FloatField = 3.5f,
-                              DoubleField = 4.5
-                          };
-            var doc = LuceneMediator<NumericRecord>.ToDocument(obj);
-
-            Assert.AreEqual(doc.GetFields().Count, 4);
-
-            Assert.AreEqual(doc.Get("int"), "1");
-            Assert.IsFalse(doc.GetFieldable("int").IsIndexed());
-            Assert.AreEqual(doc.Get("long"), "2");
-            Assert.IsTrue(doc.GetFieldable("long").IsIndexed());
-            Assert.AreEqual(doc.Get("float"), "3.5");
-            Assert.IsFalse(doc.GetFieldable("float").IsIndexed());
-            Assert.AreEqual(doc.Get("double"), "4.5");
-            Assert.IsFalse(doc.GetFieldable("double").IsIndexed());
-        }
-
-        [Test]
-        public void CanGetNumericFields()
+        public void CheckNumericFields()
         {
             var obj = new NumericRecord
                           {
@@ -88,18 +54,7 @@ namespace ActiveLucene.Net.Tests
         }
 
         [Test]
-        public void CanSetDateField()
-        {
-            var dt = DateTime.Now;
-            var obj = new DateRecord { Date = dt };
-            var doc = LuceneMediator<DateRecord>.ToDocument(obj);
-
-            Assert.AreEqual(doc.GetFields().Count, 3);
-            Assert.AreEqual(doc.Get("date"), DateTools.DateToString(dt, DateTools.Resolution.SECOND));
-        }
-
-        [Test]
-        public void CanGetDateField()
+        public void CheckDateField()
         {
             var dt = DateTime.Now;
             var obj = new DateRecord { Date = dt };
@@ -121,7 +76,7 @@ namespace ActiveLucene.Net.Tests
         }
 
         [Test]
-        public void CheckDateTypes()
+        public void CheckDateKinds()
         {
             var dt = DateTime.Now;
             var dtUtc = DateTime.UtcNow;
@@ -141,32 +96,32 @@ namespace ActiveLucene.Net.Tests
         }
 
         [Test]
-        public void CanSetCollectionFields()
+        public void CheckCollectionFields()
         {
             var obj = new CollectionRecord
                           {
-                              NumberList = new[] { 1, 2, 3 }.ToList(),
-                              StringArray = new[] { "one", "two", "three" }
+                              NumberList = new[] {1, 2, 3}.ToList(),
+                              StringArray = new[] {"one", "two", "three"}
                           };
             var doc = LuceneMediator<CollectionRecord>.ToDocument(obj);
 
-            var fields = doc.GetValues("number");
-            obj.NumberList.ForEach(x => Assert.Contains(x.ToString(), fields));
-
-            fields = doc.GetValues("string");
-            obj.StringArray.ToList().ForEach(x => Assert.Contains(x, fields));
+            var obj2 = LuceneMediator<CollectionRecord>.ToRecord(doc);
+            Assert.That(obj2.NumberList, new CollectionEquivalentConstraint(obj.NumberList));
+            Assert.That(obj2.StringArray, new CollectionEquivalentConstraint(obj.StringArray));
         }
 
         [Test]
-        public void CanGetCollectionFields()
+        public void CanHandleNulls()
         {
-            var obj = new CollectionRecord { NumberList = new[] { 1, 2, 3 }.ToList() };
-            var doc = LuceneMediator<CollectionRecord>.ToDocument(obj);
+            var obj = new TestRecord();
+            Assert.That(delegate { LuceneMediator<TestRecord>.ToDocument(obj); }, new ThrowsNothingConstraint());
 
-            var obj2 = LuceneMediator<CollectionRecord>.ToRecord(doc);
-            Assert.Contains(1, obj2.NumberList);
-            Assert.Contains(2, obj2.NumberList);
-            Assert.Contains(3, obj2.NumberList);
+            var obj2 = new CollectionRecord();
+            Assert.That(delegate { LuceneMediator<CollectionRecord>.ToDocument(obj2); }, new ThrowsNothingConstraint());
+
+            // this shouldn't even matter since they're all value types but might as well test it
+            var obj3 = new NumericRecord();
+            Assert.That(delegate { LuceneMediator<NumericRecord>.ToDocument(obj3); }, new ThrowsNothingConstraint());
         }
     }
 }

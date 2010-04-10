@@ -15,6 +15,7 @@
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -94,7 +95,7 @@ namespace ActiveLucene.Net.FieldHandler
                 if (attribute == null || String.IsNullOrEmpty(attribute.Name))
                     continue;
 
-                var ctxType = GetFieldHandlerContextType(propertyInfo.PropertyType);
+                var ctxType = FieldHandlerHelpers.GetFieldHandlerContextType(propertyInfo.PropertyType);
                 var memberField = new CodeMemberField(ctxType, GetUniqueVariableName())
                                       {
                                           Attributes = MemberAttributes.Private,
@@ -123,7 +124,7 @@ namespace ActiveLucene.Net.FieldHandler
 
             fieldHandler.Members.AddRange(new[] { ctor, documentToRecordMethod, recordToDocumentMethod });
 
-            var compilerParams = new CompilerParameters()
+            var compilerParams = new CompilerParameters
                                      {
                                          CompilerOptions = "/optimize",
                                      };
@@ -163,24 +164,6 @@ namespace ActiveLucene.Net.FieldHandler
         private static string GetUniqueVariableName()
         {
             return "x" + _random.Next().ToString("x");
-        }
-
-        private static Type GetFieldHandlerContextType(Type type)
-        {
-            if (type == typeof(string))
-                return typeof (StringFieldHandlerContext);
-            if (type == typeof(int))
-                return typeof (IntFieldHandlerContext);
-            if (type == typeof(long))
-                return typeof (LongFieldHandlerContext);
-            if (type == typeof(float))
-                return typeof (FloatFieldHandlerContext);
-            if (type == typeof(double))
-                return typeof (DoubleFieldHandlerContext);
-            if (type == typeof(DateTime))
-                return typeof (DateTimeFieldHandlerContext);
-
-            return typeof(GenericFieldHandlerContext<>).MakeGenericType(type);
         }
     }
 }

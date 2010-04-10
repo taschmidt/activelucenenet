@@ -16,23 +16,14 @@ using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net.FieldHandler
 {
-    public class DoubleFieldHandlerContext : FieldHandlerContextBase<double>
+    public interface IFieldHandlerContext
     {
-        private NumericField _field;
+        void Init(FieldHandlerConfiguration configuration);
+    }
 
-        public override void Init()
-        {
-            _field = new NumericField(Configuration.Name, Configuration.Store, Configuration.Index != Field.Index.NO);
-        }
-
-        public override double GetValue(Document document)
-        {
-            return IfNotNull(document.Get(Configuration.Name), double.Parse);
-        }
-
-        public override void SetFields(Document document, double value)
-        {
-            document.Add(_field.SetDoubleValue(value));
-        }
+    public interface IFieldHandlerContext<T> : IFieldHandlerContext
+    {
+        T GetValue(Document document);
+        void SetFields(Document document, T value);
     }
 }
