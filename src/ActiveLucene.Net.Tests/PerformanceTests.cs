@@ -25,7 +25,7 @@ namespace ActiveLucene.Net.Tests
         [Test]
         public void LuceneMediatorPerfTest()
         {
-            PerfTest(LuceneMediator<TestRecord>.RecordToDocument, LuceneMediator<TestRecord>.DocumentToRecord);
+            PerfTest(LuceneMediator<TestRecord>.ToDocument, LuceneMediator<TestRecord>.ToRecord);
         }
 
         [Test, Ignore("No need to run the slow reflection one every time.")]

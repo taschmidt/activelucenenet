@@ -19,7 +19,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using Lucene.Net.Documents;
 using Microsoft.CSharp;
 
@@ -27,8 +26,8 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public interface IFieldHandler<T>
     {
-        T DocumentToRecord(Document doc);
-        void RecordToDocument(Document doc, T record);
+        T ToRecord(Document doc);
+        void ToDocument(Document doc, T record);
     }
 
     internal static class FieldHandlerGenerator<T>
@@ -41,13 +40,13 @@ namespace ActiveLucene.Net.FieldHandler
 
             var ctor = new CodeConstructor {Attributes = MemberAttributes.Public};
 
-            var documentToRecordMethod = new CodeMemberMethod {Name = "DocumentToRecord", Attributes = MemberAttributes.Public};
+            var documentToRecordMethod = new CodeMemberMethod {Name = "ToRecord", Attributes = MemberAttributes.Public};
             documentToRecordMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof(Document), "doc"));
             documentToRecordMethod.ReturnType = new CodeTypeReference(typeof (T));
             documentToRecordMethod.Statements.Add(new CodeVariableDeclarationStatement(typeof (T), "record",
                                                                           new CodeObjectCreateExpression(typeof (T))));
 
-            var recordToDocumentMethod = new CodeMemberMethod {Name = "RecordToDocument", Attributes = MemberAttributes.Public};
+            var recordToDocumentMethod = new CodeMemberMethod {Name = "ToDocument", Attributes = MemberAttributes.Public};
             recordToDocumentMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof (Document), "doc"));
             recordToDocumentMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof (T), "record"));
             recordToDocumentMethod.Statements.Add(new CodeSnippetStatement("\tdoc.GetFields().Clear();"));

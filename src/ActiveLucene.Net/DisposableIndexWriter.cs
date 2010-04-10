@@ -61,13 +61,13 @@ namespace ActiveLucene.Net
 
         public void AddRecord(T record)
         {
-            LuceneMediator<T>.RecordToDocument(_document, record);
+            LuceneMediator<T>.ToDocument(_document, record);
             base.AddDocument(_document);
         }
 
         public void AddRecord(T record, Analyzer analyzer)
         {
-            LuceneMediator<T>.RecordToDocument(_document, record);
+            LuceneMediator<T>.ToDocument(_document, record);
             base.AddDocument(_document, analyzer);
         }
     }
