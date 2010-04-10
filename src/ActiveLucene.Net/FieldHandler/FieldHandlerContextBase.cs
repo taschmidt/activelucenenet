@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net.FieldHandler
@@ -28,14 +29,21 @@ namespace ActiveLucene.Net.FieldHandler
 
     public abstract class FieldHandlerContextBase<T> : IFieldHandlerContext<T>
     {
+        public abstract void Init();
         public abstract T GetValue(Document document);
         public abstract void SetFields(Document document, T value);
 
         public FieldHandlerConfiguration Configuration { get; private set; }
 
-        protected FieldHandlerContextBase(FieldHandlerConfiguration configuration)
+        public void Init(FieldHandlerConfiguration configuration)
         {
             Configuration = configuration;
+            Init();
+        }
+
+        protected T IfNotNull(string str, Func<string, T> fxn)
+        {
+            return !String.IsNullOrEmpty(str) ? fxn(str) : default(T);
         }
     }
 }

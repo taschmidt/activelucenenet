@@ -17,6 +17,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Lucene.Net.Documents;
 using Microsoft.CSharp;
 
@@ -58,6 +59,7 @@ namespace ActiveLucene.Net.FieldHandler
 
             sb.AppendFormat("public class {0} : IFieldHandler<{1}> {{\n\n", typeName, typeof(T).FullName);
 
+            var sbCtor = new StringBuilder();
             var sbSetMethod = new StringBuilder();
             var sbGetMethod = new StringBuilder();
 
@@ -73,15 +75,19 @@ namespace ActiveLucene.Net.FieldHandler
 
                 var memberName = GetUniqueVariableName();
 
-                if (propertyInfo.PropertyType == typeof(string))
-                {
-                    sb.AppendFormat("private readonly StringFieldHandlerContext {0} = new StringFieldHandlerContext({1});\n",
-                                    memberName, ToFieldHandlerConfiguration(attribute));
-                }
+                sb.AppendFormat("private readonly {0} {1} = new {0}();\n",
+                                GetFieldHandlerContextName(propertyInfo.PropertyType),
+                                memberName);
 
+                sbCtor.AppendFormat("\t{0}.Init({1});\n", memberName, ToFieldHandlerConfiguration(attribute));
                 sbGetMethod.AppendFormat("\trecord.{0} = {1}.GetValue(doc);\n", propertyInfo.Name, memberName);
                 sbSetMethod.AppendFormat("\t{0}.SetFields(doc, record.{1});\n", memberName, propertyInfo.Name);
             }
+
+            // append the constructor
+            sb.AppendFormat("\npublic {0}() {{\n\n", typeName);
+            sb.AppendLine(sbCtor.ToString());
+            sb.Append("\n}\n");
 
             // append the Set method
             sb.AppendFormat("\npublic void Set(Document doc, {0} record) {{\n\n", typeof(T).FullName);
@@ -92,7 +98,7 @@ namespace ActiveLucene.Net.FieldHandler
             // append the Get method
             sb.AppendFormat("\npublic {0} Get(Document doc) {{\n\n", typeof(T).FullName);
             sb.AppendFormat("\tvar record = new {0}();\n", typeof (T).FullName);
-            sb.Append(sbGetMethod.ToString());
+            sb.AppendLine(sbGetMethod.ToString());
             sb.AppendFormat("\treturn record;\n");
             sb.Append("\n}\n");
 
@@ -136,11 +142,6 @@ namespace ActiveLucene.Net.FieldHandler
         private static string GetUniqueVariableName()
         {
             return "x" + _random.Next().ToString("x");
-        }
-
-        private static bool IsNumericFieldType(Type type)
-        {
-            return type == typeof (int) || type == typeof (long) || type == typeof (float) || type == typeof (double);
         }
 
         private static string ToFieldStoreConstant(StorageBehavior storageBehavior)
@@ -189,6 +190,24 @@ namespace ActiveLucene.Net.FieldHandler
                                  ToFieldStoreConstant(fieldAttribute.StorageBehavior),
                                  ToFieldIndexConstant(fieldAttribute.IndexBehavior),
                                  ToDateToolsResolutionConstant(fieldAttribute.DateResolution));
+        }
+
+        private static string GetFieldHandlerContextName(Type type)
+        {
+            if (type == typeof(string))
+                return "StringFieldHandlerContext";
+            if (type == typeof(int))
+                return "IntFieldHandlerContext";
+            if (type == typeof(long))
+                return "LongFieldHandlerContext";
+            if (type == typeof(float))
+                return "FloatFieldHandlerContext";
+            if (type == typeof(double))
+                return "DoubleFieldHandlerContext";
+            if (type == typeof(DateTime))
+                return "DateTimeFieldHandlerContext";
+
+            return String.Format("GenericFieldHandlerContext<{0}>", type.FullName);
         }
     }
 }

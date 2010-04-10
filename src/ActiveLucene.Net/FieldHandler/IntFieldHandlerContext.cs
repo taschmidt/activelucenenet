@@ -17,23 +17,23 @@ using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net.FieldHandler
 {
-    public class StringFieldHandlerContext : FieldHandlerContextBase<string>
+    public class IntFieldHandlerContext : FieldHandlerContextBase<int>
     {
-        private Field _field;
+        private NumericField _field;
 
         public override void Init()
         {
-            _field = new Field(Configuration.Name, "", Configuration.Store, Configuration.Index);
+            _field = new NumericField(Configuration.Name, Configuration.Store, Configuration.Index != Field.Index.NO);
         }
 
-        public override string GetValue(Document document)
+        public override int GetValue(Document document)
         {
-            return document.Get(Configuration.Name);
+            return IfNotNull(document.Get(Configuration.Name), int.Parse);
         }
 
-        public override void SetFields(Document document, string value)
+        public override void SetFields(Document document, int value)
         {
-            document.Add(_field.Set(value));
+            document.Add(_field.SetIntValue(value));
         }
     }
 }

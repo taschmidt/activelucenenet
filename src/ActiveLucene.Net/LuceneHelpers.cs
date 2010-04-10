@@ -99,5 +99,11 @@ namespace ActiveLucene.Net
 
             return new DateTime(dt.Value.Ticks, DateTimeKind.Utc);
         }
+
+        public static Field Set(this Field field, string val)
+        {
+            field.SetValue(val);
+            return field;
+        }
     }
 }
