@@ -353,7 +353,7 @@ namespace ActiveLucene.Net
         {
             using(var searcher = GetIndexSearcher())
             {
-                return LuceneMediator<T>.Get(searcher.Doc(doc));
+                return LuceneMediator<T>.DocumentToRecord(searcher.Doc(doc));
             }
         }
 

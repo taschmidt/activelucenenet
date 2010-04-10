@@ -21,14 +21,21 @@ namespace ActiveLucene.Net
     {
         private static readonly IFieldHandler<T> _fieldHandler = FieldHandlerGenerator<T>.Create();
 
-        public static void Set(Document doc, T record)
+        public static T DocumentToRecord(Document doc)
         {
-            _fieldHandler.Set(doc, record);
+            return _fieldHandler.DocumentToRecord(doc);
         }
 
-        public static T Get(Document doc)
+        public static Document RecordToDocument(T record)
         {
-            return _fieldHandler.Get(doc);
+            var doc = new Document();
+            _fieldHandler.RecordToDocument(doc, record);
+            return doc;
+        }
+
+        public static void RecordToDocument(Document doc, T record)
+        {
+            _fieldHandler.RecordToDocument(doc, record);
         }
     }
 }

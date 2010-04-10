@@ -13,8 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.CodeDom;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -25,108 +27,128 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public interface IFieldHandler<T>
     {
-        void Set(Document doc, T record);
-        T Get(Document doc);
-    }
-
-    public class FieldHandlerConfiguration
-    {
-        public string Name { get; set; }
-        public Field.Store Store { get; set; }
-        public Field.Index Index { get; set; }
-        public DateTools.Resolution DateResolution { get; set; }
+        T DocumentToRecord(Document doc);
+        void RecordToDocument(Document doc, T record);
     }
 
     internal static class FieldHandlerGenerator<T>
     {
         internal static IFieldHandler<T> Create()
         {
-            var prov = new CSharpCodeProvider(new Dictionary<string, string>
-                                                  {
-                                                      {"CompilerVersion", "v3.5"}
-                                                  });
-
-            var sb = new StringBuilder();
-
             var typeName = typeof(T).Name + "FieldHandler";
-            sb.Append("using System;\n");
-            sb.Append("using System.Linq;\n");
-            sb.Append("using System.Collections.Generic;\n");
-            sb.Append("using Lucene.Net;\n");
-            sb.Append("using Lucene.Net.Documents;\n");
-            sb.AppendFormat("using {0};\n", typeof(FieldHandlerGenerator<>).Namespace);
-            sb.Append("\n\n");
+            var fieldHandler = new CodeTypeDeclaration(typeName) {IsClass = true};
+            fieldHandler.BaseTypes.Add(typeof (IFieldHandler<>).MakeGenericType(typeof (T)));
 
-            sb.AppendFormat("public class {0} : IFieldHandler<{1}> {{\n\n", typeName, typeof(T).FullName);
+            var ctor = new CodeConstructor {Attributes = MemberAttributes.Public};
 
-            var sbCtor = new StringBuilder();
-            var sbSetMethod = new StringBuilder();
-            var sbGetMethod = new StringBuilder();
+            var documentToRecordMethod = new CodeMemberMethod {Name = "DocumentToRecord", Attributes = MemberAttributes.Public};
+            documentToRecordMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof(Document), "doc"));
+            documentToRecordMethod.ReturnType = new CodeTypeReference(typeof (T));
+            documentToRecordMethod.Statements.Add(new CodeVariableDeclarationStatement(typeof (T), "record",
+                                                                          new CodeObjectCreateExpression(typeof (T))));
 
-            // first, walk the properties and set up the Get/Set methods
+            var recordToDocumentMethod = new CodeMemberMethod {Name = "RecordToDocument", Attributes = MemberAttributes.Public};
+            recordToDocumentMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof (Document), "doc"));
+            recordToDocumentMethod.Parameters.Add(new CodeParameterDeclarationExpression(typeof (T), "record"));
+            recordToDocumentMethod.Statements.Add(new CodeSnippetStatement("\tdoc.GetFields().Clear();"));
+
+            var ns = new CodeNamespace
+                         {
+                             Imports =
+                                 {
+                                     new CodeNamespaceImport("System"),
+                                     new CodeNamespaceImport("System.Linq"),
+                                     new CodeNamespaceImport("System.Collections.Generic"),
+                                     new CodeNamespaceImport("Lucene.Net"),
+                                     new CodeNamespaceImport("Lucene.Net.Documents")
+                                 },
+                             Types = {fieldHandler}
+                         };
+
+            var compileUnit = new CodeCompileUnit
+                                  {
+                                      Namespaces =
+                                          {
+                                              ns,
+                                          },
+                                      ReferencedAssemblies =
+                                          {
+                                              "System.Core.dll",
+
+                                              // add Lucene assembly
+                                              typeof (Document).Assembly.Location,
+
+                                              // add this assembly
+                                              typeof (FieldHandlerGenerator<>).Assembly.Location,
+
+                                              // add the referenced type's assembly
+                                              typeof (T).Assembly.Location
+                                          }
+                                  };
+
             foreach (var propertyInfo in typeof(T).GetProperties())
             {
-                var attribute = propertyInfo.GetCustomAttributes(typeof (LuceneFieldAttribute), false)
+                var attribute = propertyInfo.GetCustomAttributes(typeof(LuceneFieldAttribute), false)
                     .Cast<LuceneFieldAttribute>()
                     .FirstOrDefault();
 
                 if (attribute == null || String.IsNullOrEmpty(attribute.Name))
                     continue;
 
-                var memberName = GetUniqueVariableName();
+                var ctxType = GetFieldHandlerContextType(propertyInfo.PropertyType);
+                var memberField = new CodeMemberField(ctxType, GetUniqueVariableName())
+                                      {
+                                          Attributes = MemberAttributes.Private,
+                                          InitExpression = new CodeObjectCreateExpression(ctxType)
+                                      };
 
-                sb.AppendFormat("private readonly {0} {1} = new {0}();\n",
-                                GetFieldHandlerContextName(propertyInfo.PropertyType),
-                                memberName);
+                fieldHandler.Members.Add(memberField);
 
-                sbCtor.AppendFormat("\t{0}.Init({1});\n", memberName, ToFieldHandlerConfiguration(attribute));
-                sbGetMethod.AppendFormat("\trecord.{0} = {1}.GetValue(doc);\n", propertyInfo.Name, memberName);
-                sbSetMethod.AppendFormat("\t{0}.SetFields(doc, record.{1});\n", memberName, propertyInfo.Name);
+                var configuration = new CodeObjectCreateExpression(
+                    typeof (FieldHandlerConfiguration),
+                    new CodePrimitiveExpression(attribute.Name),
+                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof (StorageBehavior)), attribute.StorageBehavior.ToString()),
+                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof (IndexBehavior)), attribute.IndexBehavior.ToString()),
+                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof (DateResolution)), attribute.DateResolution.ToString()));
+
+                ctor.Statements.Add(new CodeMethodInvokeExpression(
+                                        new CodeVariableReferenceExpression(memberField.Name),
+                                        "Init",
+                                        configuration));
+
+                documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = {1}.GetValue(doc);\n", propertyInfo.Name, memberField.Name)));
+                recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\t{0}.SetFields(doc, record.{1});\n", memberField.Name, propertyInfo.Name)));
             }
 
-            // append the constructor
-            sb.AppendFormat("\npublic {0}() {{\n\n", typeName);
-            sb.AppendLine(sbCtor.ToString());
-            sb.Append("\n}\n");
+            documentToRecordMethod.Statements.Add(new CodeMethodReturnStatement(new CodeVariableReferenceExpression("record")));
 
-            // append the Set method
-            sb.AppendFormat("\npublic void Set(Document doc, {0} record) {{\n\n", typeof(T).FullName);
-            sb.AppendFormat("\tdoc.GetFields().Clear();\n");
-            sb.Append(sbSetMethod.ToString());
-            sb.Append("\n}\n");
+            fieldHandler.Members.AddRange(new[] { ctor, documentToRecordMethod, recordToDocumentMethod });
 
-            // append the Get method
-            sb.AppendFormat("\npublic {0} Get(Document doc) {{\n\n", typeof(T).FullName);
-            sb.AppendFormat("\tvar record = new {0}();\n", typeof (T).FullName);
-            sb.AppendLine(sbGetMethod.ToString());
-            sb.AppendFormat("\treturn record;\n");
-            sb.Append("\n}\n");
-
-            // end class
-            sb.Append("\n}\n");
-
-            var compilerParams = new CompilerParameters(new[]
-                                                            {
-                                                                "System.Core.dll",
-
-                                                                // add Lucene assembly
-                                                                typeof(Document).Assembly.Location,
-
-                                                                // add this assembly
-                                                                typeof (FieldHandlerGenerator<>).Assembly.Location,
-
-                                                                // add the referenced type's assembly
-                                                                typeof (T).Assembly.Location
-                                                            })
+            var compilerParams = new CompilerParameters()
                                      {
                                          CompilerOptions = "/optimize",
                                      };
 
-            var compilerResults = prov.CompileAssemblyFromSource(compilerParams, sb.ToString());
-            if(compilerResults.Errors.HasErrors)
+            var prov = new CSharpCodeProvider(new Dictionary<string, string>
+                                                  {
+                                                      {"CompilerVersion", "v3.5"}
+                                                  });
+            var sb = new StringBuilder();
+            using(var writer = new StringWriter(sb))
+            {
+                prov.GenerateCodeFromCompileUnit(compileUnit, writer,
+                                                 new CodeGeneratorOptions
+                                                     {
+                                                         BlankLinesBetweenMembers = true,
+                                                         BracingStyle = "C",
+                                                     });
+            }
+
+            var compilerResults = prov.CompileAssemblyFromDom(compilerParams, compileUnit);
+            if (compilerResults.Errors.HasErrors)
             {
                 var sbErrors = new StringBuilder("Errors in field handler compilation.\n\n");
-                foreach(var error in compilerResults.Errors)
+                foreach (var error in compilerResults.Errors)
                 {
                     sbErrors.AppendLine("\t" + error);
                 }
@@ -144,70 +166,22 @@ namespace ActiveLucene.Net.FieldHandler
             return "x" + _random.Next().ToString("x");
         }
 
-        private static string ToFieldStoreConstant(StorageBehavior storageBehavior)
-        {
-            switch (storageBehavior)
-            {
-                case StorageBehavior.Compress:
-                    return "Field.Store.COMPRESS";
-                case StorageBehavior.DoNotStore:
-                    return "Field.Store.NO";
-                case StorageBehavior.Store:
-                    return "Field.Store.YES";
-                default:
-                    throw new Exception("Unknown storage behavior");
-            }
-        }
-
-        private static string ToFieldIndexConstant(IndexBehavior indexBehavior)
-        {
-            switch (indexBehavior)
-            {
-                case IndexBehavior.Analyze:
-                    return "Field.Index.ANALYZED";
-                case IndexBehavior.AnalyzeNoNormalization:
-                    return "Field.Index.ANALYZED_NO_NORMS";
-                case IndexBehavior.DoNotAnalyze:
-                    return "Field.Index.NOT_ANALYZED";
-                case IndexBehavior.DoNotAnalyzeNoNormalization:
-                    return "Field.Index.NOT_ANALYZED_NO_NORMS";
-                case IndexBehavior.DoNotIndex:
-                    return "Field.Index.NO";
-                default:
-                    throw new Exception("Unknown index behavior");
-            }
-        }
-
-        private static string ToDateToolsResolutionConstant(DateResolution dateResolution)
-        {
-            return "DateTools.Resolution." + dateResolution.ToString().ToUpper();
-        }
-
-        private static string ToFieldHandlerConfiguration(LuceneFieldAttribute fieldAttribute)
-        {
-            return String.Format("new FieldHandlerConfiguration{{Name=\"{0}\", Store={1}, Index={2}, DateResolution={3}}}",
-                                 fieldAttribute.Name,
-                                 ToFieldStoreConstant(fieldAttribute.StorageBehavior),
-                                 ToFieldIndexConstant(fieldAttribute.IndexBehavior),
-                                 ToDateToolsResolutionConstant(fieldAttribute.DateResolution));
-        }
-
-        private static string GetFieldHandlerContextName(Type type)
+        private static Type GetFieldHandlerContextType(Type type)
         {
             if (type == typeof(string))
-                return "StringFieldHandlerContext";
+                return typeof (StringFieldHandlerContext);
             if (type == typeof(int))
-                return "IntFieldHandlerContext";
+                return typeof (IntFieldHandlerContext);
             if (type == typeof(long))
-                return "LongFieldHandlerContext";
+                return typeof (LongFieldHandlerContext);
             if (type == typeof(float))
-                return "FloatFieldHandlerContext";
+                return typeof (FloatFieldHandlerContext);
             if (type == typeof(double))
-                return "DoubleFieldHandlerContext";
+                return typeof (DoubleFieldHandlerContext);
             if (type == typeof(DateTime))
-                return "DateTimeFieldHandlerContext";
+                return typeof (DateTimeFieldHandlerContext);
 
-            return String.Format("GenericFieldHandlerContext<{0}>", type.FullName);
+            return typeof(GenericFieldHandlerContext<>).MakeGenericType(type);
         }
     }
 }

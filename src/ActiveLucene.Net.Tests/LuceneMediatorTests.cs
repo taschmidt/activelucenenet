@@ -26,8 +26,7 @@ namespace ActiveLucene.Net.Tests
         public void CanSetFields()
         {
             var obj = new TestRecord { Data = "foo", Data2 = "bar" };
-            var doc = new Document();
-            LuceneMediator<TestRecord>.Set(doc, obj);
+            var doc = LuceneMediator<TestRecord>.RecordToDocument(obj);
 
             Assert.AreEqual(doc.GetFields().Count, 2);
             Assert.AreEqual(doc.Get("data"), "foo");
@@ -38,10 +37,9 @@ namespace ActiveLucene.Net.Tests
         public void CanGetFields()
         {
             var obj = new TestRecord { Data = "foo", Data2 = "bar" };
-            var doc = new Document();
-            LuceneMediator<TestRecord>.Set(doc, obj);
+            var doc = LuceneMediator<TestRecord>.RecordToDocument(obj);
 
-            var obj2 = LuceneMediator<TestRecord>.Get(doc);
+            var obj2 = LuceneMediator<TestRecord>.DocumentToRecord(doc);
             Assert.AreEqual(obj2.Data, "foo");
             Assert.AreEqual(obj2.Data2, "bar");
         }
@@ -56,8 +54,7 @@ namespace ActiveLucene.Net.Tests
                               FloatField = 3.5f,
                               DoubleField = 4.5
                           };
-            var doc = new Document();
-            LuceneMediator<NumericRecord>.Set(doc, obj);
+            var doc = LuceneMediator<NumericRecord>.RecordToDocument(obj);
 
             Assert.AreEqual(doc.GetFields().Count, 4);
 
@@ -81,10 +78,9 @@ namespace ActiveLucene.Net.Tests
                               FloatField = 3.5f,
                               DoubleField = 4.5
                           };
-            var doc = new Document();
-            LuceneMediator<NumericRecord>.Set(doc, obj);
+            var doc = LuceneMediator<NumericRecord>.RecordToDocument(obj);
 
-            var obj2 = LuceneMediator<NumericRecord>.Get(doc);
+            var obj2 = LuceneMediator<NumericRecord>.DocumentToRecord(doc);
             Assert.AreEqual(obj2.IntField, 1);
             Assert.AreEqual(obj2.LongField, 2);
             Assert.AreEqual(obj2.FloatField, 3.5f);
@@ -96,8 +92,7 @@ namespace ActiveLucene.Net.Tests
         {
             var dt = DateTime.Now;
             var obj = new DateRecord { Date = dt };
-            var doc = new Document();
-            LuceneMediator<DateRecord>.Set(doc, obj);
+            var doc = LuceneMediator<DateRecord>.RecordToDocument(obj);
 
             Assert.AreEqual(doc.GetFields().Count, 3);
             Assert.AreEqual(doc.Get("date"), DateTools.DateToString(dt, DateTools.Resolution.SECOND));
@@ -108,10 +103,9 @@ namespace ActiveLucene.Net.Tests
         {
             var dt = DateTime.Now;
             var obj = new DateRecord { Date = dt };
-            var doc = new Document();
-            LuceneMediator<DateRecord>.Set(doc, obj);
+            var doc = LuceneMediator<DateRecord>.RecordToDocument(obj);
 
-            var obj2 = LuceneMediator<DateRecord>.Get(doc);
+            var obj2 = LuceneMediator<DateRecord>.DocumentToRecord(doc);
             Assert.AreEqual(DateTools.Round(dt, DateTools.Resolution.SECOND), obj2.Date);
         }
 
@@ -120,10 +114,9 @@ namespace ActiveLucene.Net.Tests
         {
             var dt = DateTime.Now;
             var obj = new DateRecord { DateDay = dt };
-            var doc = new Document();
-            LuceneMediator<DateRecord>.Set(doc, obj);
+            var doc = LuceneMediator<DateRecord>.RecordToDocument(obj);
 
-            var obj2 = LuceneMediator<DateRecord>.Get(doc);
+            var obj2 = LuceneMediator<DateRecord>.DocumentToRecord(doc);
             Assert.AreEqual(DateTools.Round(dt, DateTools.Resolution.DAY), obj2.DateDay);
         }
 
@@ -137,10 +130,9 @@ namespace ActiveLucene.Net.Tests
                               Date = dt,
                               UtcDate = dtUtc
                           };
-            var doc = new Document();
-            LuceneMediator<DateRecord>.Set(doc, obj);
+            var doc = LuceneMediator<DateRecord>.RecordToDocument(obj);
 
-            var obj2 = LuceneMediator<DateRecord>.Get(doc);
+            var obj2 = LuceneMediator<DateRecord>.DocumentToRecord(doc);
 
             // these pass although both dates come out as DateTimeKind.Unspecified
             // since DateTime.Equals doesn't look at the Kind.
@@ -156,8 +148,7 @@ namespace ActiveLucene.Net.Tests
                               NumberList = new[] { 1, 2, 3 }.ToList(),
                               StringArray = new[] { "one", "two", "three" }
                           };
-            var doc = new Document();
-            LuceneMediator<CollectionRecord>.Set(doc, obj);
+            var doc = LuceneMediator<CollectionRecord>.RecordToDocument(obj);
 
             var fields = doc.GetValues("number");
             obj.NumberList.ForEach(x => Assert.Contains(x.ToString(), fields));
@@ -170,10 +161,9 @@ namespace ActiveLucene.Net.Tests
         public void CanGetCollectionFields()
         {
             var obj = new CollectionRecord { NumberList = new[] { 1, 2, 3 }.ToList() };
-            var doc = new Document();
-            LuceneMediator<CollectionRecord>.Set(doc, obj);
+            var doc = LuceneMediator<CollectionRecord>.RecordToDocument(obj);
 
-            var obj2 = LuceneMediator<CollectionRecord>.Get(doc);
+            var obj2 = LuceneMediator<CollectionRecord>.DocumentToRecord(doc);
             Assert.Contains(1, obj2.NumberList);
             Assert.Contains(2, obj2.NumberList);
             Assert.Contains(3, obj2.NumberList);

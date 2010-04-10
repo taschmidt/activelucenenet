@@ -103,7 +103,7 @@ namespace ActiveLucene.Net.Tests
             using (var indexSearcher = indexManager.GetIndexSearcher())
             {
                 Assert.AreEqual(indexSearcher.MaxDoc(), 1);
-                var obj = LuceneMediator<TestRecord>.Get(indexSearcher.Doc(0));
+                var obj = LuceneMediator<TestRecord>.DocumentToRecord(indexSearcher.Doc(0));
                 Assert.AreEqual(obj.Data, "foo");
                 Assert.AreEqual(obj.Data2, "bar");
             }
