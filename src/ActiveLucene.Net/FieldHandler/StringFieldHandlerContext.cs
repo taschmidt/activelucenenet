@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Lucene.Net.Documents;
-
 namespace ActiveLucene.Net.FieldHandler
 {
     public class StringFieldHandlerContext : FieldHandlerContextBase<string>
     {
+        public StringFieldHandlerContext(FieldHandlerConfiguration configuration) : base(configuration)
+        {}
+
         public override string StringToValue(string value)
         {
             return value;

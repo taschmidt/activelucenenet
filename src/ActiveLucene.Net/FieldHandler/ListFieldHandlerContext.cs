@@ -20,15 +20,15 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public class ListFieldHandlerContext<T, TItem> : IFieldHandlerContext<T> where T : class, IList
     {
-        private FieldHandlerContextBase<TItem> _itemFieldHandlerContext;
+        private readonly FieldHandlerContextBase<TItem> _itemFieldHandlerContext;
 
         protected FieldHandlerConfiguration Configuration { get; private set; }
 
-        public void Init(FieldHandlerConfiguration configuration)
+        public ListFieldHandlerContext(FieldHandlerConfiguration configuration)
         {
             Configuration = configuration;
             _itemFieldHandlerContext = (FieldHandlerContextBase<TItem>)Activator.CreateInstance(
-                FieldHandlerHelpers.GetFieldHandlerContextType(typeof(TItem)));
+                FieldHandlerHelpers.GetFieldHandlerContextType(typeof(TItem)), Configuration);
         }
 
         public T GetValue(Document document)

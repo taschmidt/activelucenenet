@@ -57,7 +57,7 @@
     <Compile Include="FieldHandler\FieldHandlerContextBase.cs" />
     <Compile Include="FieldHandler\FieldHandlerHelpers.cs" />
     <Compile Include="FieldHandler\IFieldHandlerContext.cs" />
-    <Compile Include="FieldHandler\GenericFieldHandlerContext.cs" />
+    <Compile Include="FieldHandler\DefaultFieldHandlerContext.cs" />
     <Compile Include="FieldHandler\ListFieldHandlerContext.cs" />
     <Compile Include="FieldHandler\StringFieldHandlerContext.cs" />
     <Compile Include="IndexManager.cs" />

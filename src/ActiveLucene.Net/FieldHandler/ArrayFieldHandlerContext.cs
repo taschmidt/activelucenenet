@@ -21,18 +21,18 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public class ArrayFieldHandlerContext<T, TItem> : IFieldHandlerContext<T> where T : class, IList
     {
-        private FieldHandlerContextBase<TItem> _itemFieldHandlerContext;
+        private readonly FieldHandlerContextBase<TItem> _itemFieldHandlerContext;
 
-        protected FieldHandlerConfiguration Configuration { get; private set; }
+        protected readonly FieldHandlerConfiguration Configuration;
 
-        public void Init(FieldHandlerConfiguration configuration)
+        public ArrayFieldHandlerContext(FieldHandlerConfiguration configuration)
         {
-            if(!typeof(T).IsArray)
+            if (!typeof(T).IsArray)
                 throw new Exception("ArrayFieldHandlerContext used on a type that isn't an array.");
 
             Configuration = configuration;
             _itemFieldHandlerContext = (FieldHandlerContextBase<TItem>)Activator.CreateInstance(
-                FieldHandlerHelpers.GetFieldHandlerContextType(typeof(TItem)));
+                FieldHandlerHelpers.GetFieldHandlerContextType(typeof(TItem)), Configuration);
         }
 
         public T GetValue(Document document)

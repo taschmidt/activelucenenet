@@ -13,13 +13,14 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net.FieldHandler
 {
-    public class GenericFieldHandlerContext<T> : FieldHandlerContextBase<T>
+    public class DefaultFieldHandlerContext<T> : FieldHandlerContextBase<T>
     {
+        public DefaultFieldHandlerContext(FieldHandlerConfiguration configuration) : base(configuration)
+        {}
+
         public override T StringToValue(string value)
         {
             return (T) Convert.ChangeType(value, typeof (T));

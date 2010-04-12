@@ -24,9 +24,9 @@ namespace ActiveLucene.Net.FieldHandler
         public abstract T StringToValue(string value);
         public abstract string ValueToString(T value);
 
-        public FieldHandlerConfiguration Configuration { get; private set; }
+        protected readonly FieldHandlerConfiguration Configuration;
 
-        public void Init(FieldHandlerConfiguration configuration)
+        protected FieldHandlerContextBase(FieldHandlerConfiguration configuration)
         {
             Configuration = configuration;
             Field = new Field(Configuration.Name, "", Configuration.Store, Configuration.Index);

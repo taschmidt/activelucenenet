@@ -15,7 +15,6 @@
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -95,26 +94,21 @@ namespace ActiveLucene.Net.FieldHandler
                 if (attribute == null || String.IsNullOrEmpty(attribute.Name))
                     continue;
 
+                var ctxConfiguration = new CodeObjectCreateExpression(
+                    typeof(FieldHandlerConfiguration),
+                    new CodePrimitiveExpression(attribute.Name),
+                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof(StorageBehavior)), attribute.StorageBehavior.ToString()),
+                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof(IndexBehavior)), attribute.IndexBehavior.ToString()),
+                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof(DateResolution)), attribute.DateResolution.ToString()));
+
                 var ctxType = FieldHandlerHelpers.GetFieldHandlerContextType(propertyInfo.PropertyType);
                 var memberField = new CodeMemberField(ctxType, GetUniqueVariableName())
                                       {
                                           Attributes = MemberAttributes.Private,
-                                          InitExpression = new CodeObjectCreateExpression(ctxType)
+                                          InitExpression = new CodeObjectCreateExpression(ctxType, ctxConfiguration)
                                       };
 
                 fieldHandler.Members.Add(memberField);
-
-                var configuration = new CodeObjectCreateExpression(
-                    typeof (FieldHandlerConfiguration),
-                    new CodePrimitiveExpression(attribute.Name),
-                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof (StorageBehavior)), attribute.StorageBehavior.ToString()),
-                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof (IndexBehavior)), attribute.IndexBehavior.ToString()),
-                    new CodeFieldReferenceExpression(new CodeTypeReferenceExpression(typeof (DateResolution)), attribute.DateResolution.ToString()));
-
-                ctor.Statements.Add(new CodeMethodInvokeExpression(
-                                        new CodeVariableReferenceExpression(memberField.Name),
-                                        "Init",
-                                        configuration));
 
                 documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = {1}.GetValue(doc);\n", propertyInfo.Name, memberField.Name)));
                 recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\t{0}.SetFields(doc, record.{1});\n", memberField.Name, propertyInfo.Name)));

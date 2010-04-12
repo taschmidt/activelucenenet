@@ -19,9 +19,9 @@ using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net.FieldHandler
 {
-    internal static class FieldHandlerHelpers
+    public static class FieldHandlerHelpers
     {
-        internal static Type GetFieldHandlerContextType(Type type)
+        public static Type GetFieldHandlerContextType(Type type)
         {
             if (type == typeof(string))
                 return typeof(StringFieldHandlerContext);
@@ -38,10 +38,10 @@ namespace ActiveLucene.Net.FieldHandler
                 return typeof(ListFieldHandlerContext<,>).MakeGenericType(type, itemType);
             }
 
-            return typeof(GenericFieldHandlerContext<>).MakeGenericType(type);
+            return typeof(DefaultFieldHandlerContext<>).MakeGenericType(type);
         }
 
-        internal static Field.Store ToFieldStoreConstant(StorageBehavior storageBehavior)
+        public static Field.Store ToFieldStoreConstant(StorageBehavior storageBehavior)
         {
             switch (storageBehavior)
             {
@@ -56,7 +56,7 @@ namespace ActiveLucene.Net.FieldHandler
             }
         }
 
-        internal static Field.Index ToFieldIndexConstant(IndexBehavior indexBehavior)
+        public static Field.Index ToFieldIndexConstant(IndexBehavior indexBehavior)
         {
             switch (indexBehavior)
             {
@@ -75,7 +75,7 @@ namespace ActiveLucene.Net.FieldHandler
             }
         }
 
-        internal static DateTools.Resolution ToDateToolsResolutionConstant(DateResolution dateResolution)
+        public static DateTools.Resolution ToDateToolsResolutionConstant(DateResolution dateResolution)
         {
             switch (dateResolution)
             {

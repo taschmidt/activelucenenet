@@ -19,6 +19,9 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public class DateTimeFieldHandlerContext : FieldHandlerContextBase<DateTime>
     {
+        public DateTimeFieldHandlerContext(FieldHandlerConfiguration configuration) : base(configuration)
+        {}
+
         public override DateTime StringToValue(string value)
         {
             return DateTools.StringToDate(value);

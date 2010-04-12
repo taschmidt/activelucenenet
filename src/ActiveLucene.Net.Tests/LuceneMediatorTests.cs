@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections;
 using System.Linq;
 using Lucene.Net.Documents;
 using NUnit.Framework;
@@ -101,13 +102,15 @@ namespace ActiveLucene.Net.Tests
             var obj = new CollectionRecord
                           {
                               NumberList = new[] {1, 2, 3}.ToList(),
-                              StringArray = new[] {"one", "two", "three"}
+                              StringArray = new[] {"one", "two", "three"},
+                              ArrayList = new ArrayList(new[] {"four", "five", "six"})
                           };
             var doc = LuceneMediator<CollectionRecord>.ToDocument(obj);
 
             var obj2 = LuceneMediator<CollectionRecord>.ToRecord(doc);
             Assert.That(obj2.NumberList, new CollectionEquivalentConstraint(obj.NumberList));
             Assert.That(obj2.StringArray, new CollectionEquivalentConstraint(obj.StringArray));
+            Assert.That(obj2.ArrayList, new CollectionEquivalentConstraint(obj.ArrayList));
         }
 
         [Test]

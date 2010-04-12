@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace ActiveLucene.Net.Tests
@@ -61,5 +62,8 @@ namespace ActiveLucene.Net.Tests
 
         [LuceneField("string")]
         public string[] StringArray { get; set; }
+
+        [LuceneField("string2")]
+        public ArrayList ArrayList { get; set; }
     }
 }

@@ -18,7 +18,6 @@ namespace ActiveLucene.Net.FieldHandler
 {
     public interface IFieldHandlerContext
     {
-        void Init(FieldHandlerConfiguration configuration);
     }
 
     public interface IFieldHandlerContext<T> : IFieldHandlerContext
