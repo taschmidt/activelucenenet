@@ -126,5 +126,17 @@ namespace ActiveLucene.Net.Tests
             var obj3 = new NumericRecord();
             Assert.That(delegate { LuceneMediator<NumericRecord>.ToDocument(obj3); }, new ThrowsNothingConstraint());
         }
+
+        [Test]
+        public void CheckBooleanFields()
+        {
+            var obj = new BooleanRecord {Boolean = true};
+            var doc = LuceneMediator<BooleanRecord>.ToDocument(obj);
+            Assert.IsTrue(LuceneMediator<BooleanRecord>.ToRecord(doc).Boolean);
+
+            obj = new BooleanRecord { Boolean = false };
+            doc = LuceneMediator<BooleanRecord>.ToDocument(obj);
+            Assert.IsFalse(LuceneMediator<BooleanRecord>.ToRecord(doc).Boolean);
+        }
     }
 }

@@ -66,4 +66,10 @@ namespace ActiveLucene.Net.Tests
         [LuceneField("string2")]
         public ArrayList ArrayList { get; set; }
     }
+
+    public class BooleanRecord
+    {
+        [LuceneField("bool")]
+        public bool Boolean { get; set; }
+    }
 }
