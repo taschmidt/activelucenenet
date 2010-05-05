@@ -39,7 +39,8 @@ namespace ActiveLucene.Net.FieldHandler
 
         public void SetFields(Document document, T value)
         {
-            document.Add(Field.Set(ValueToString(value)));
+            if(value is ValueType || value != null)
+                document.Add(Field.Set(ValueToString(value)));
         }
 
         protected T IfNotNull(string str, Func<string, T> stringToValue)

@@ -138,5 +138,13 @@ namespace ActiveLucene.Net.Tests
             doc = LuceneMediator<BooleanRecord>.ToDocument(obj);
             Assert.IsFalse(LuceneMediator<BooleanRecord>.ToRecord(doc).Boolean);
         }
+
+        [Test]
+        public void DontAddNullFields()
+        {
+            var obj = new TestRecord {Data = "foo"};
+            var doc = LuceneMediator<TestRecord>.ToDocument(obj);
+            Assert.That(!doc.GetFields().Cast<Field>().Any(f => f.Name() == "data2"));
+        }
     }
 }
