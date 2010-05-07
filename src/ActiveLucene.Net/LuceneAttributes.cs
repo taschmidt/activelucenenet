@@ -56,7 +56,7 @@ namespace ActiveLucene.Net
         public IndexBehavior IndexBehavior;
         public DateResolution DateResolution = DateResolution.Second;
 
-        public LuceneFieldAttribute(string name) : this(name, StorageBehavior.Store, IndexBehavior.DoNotIndex)
+        public LuceneFieldAttribute(string name) : this(name, StorageBehavior.Store, IndexBehavior.Analyze)
         {
         }
 
