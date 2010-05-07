@@ -16,13 +16,15 @@ using System;
 using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.Store;
 
 namespace ActiveLucene.Net
 {
-    public class DisposableIndexWriter : IndexWriter, IDisposable
+    public class DisposableIndexWriter<T> : IndexWriter, IDisposable where T : class
     {
         private readonly Action _onExit;
         private IDisposable _writeLock;
+        private readonly Document _document = new Document();
 
         internal DisposableIndexWriter(LockableIndexSearcher indexSearcher, Analyzer analyzer, Action onExit)
             : base(indexSearcher.GetIndexReader().Directory(), analyzer, MaxFieldLength.LIMITED)
@@ -31,6 +33,10 @@ namespace ActiveLucene.Net
             _writeLock = indexSearcher.GetWriteLock();
         }
 
+        internal DisposableIndexWriter(Directory directory, Analyzer analyzer, bool create)
+            : base(directory, analyzer, create, MaxFieldLength.LIMITED)
+        { }
+
         ~DisposableIndexWriter()
         {
             Dispose();
@@ -38,26 +44,17 @@ namespace ActiveLucene.Net
 
         public void Dispose()
         {
+            Close();
+
+            if (_onExit != null)
+                _onExit();
+
             if (_writeLock != null)
             {
-                Close();
-
-                if (_onExit != null)
-                    _onExit();
-
                 _writeLock.Dispose();
                 _writeLock = null;
             }
         }
-    }
-
-    public class DisposableIndexWriter<T> : DisposableIndexWriter where T : class
-    {
-        private readonly Document _document = new Document();
-
-        internal DisposableIndexWriter(LockableIndexSearcher indexSearcher, Analyzer analyzer, Action onExit)
-            : base(indexSearcher, analyzer, onExit)
-        {}
 
         public void AddRecord(T record)
         {

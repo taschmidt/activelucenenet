@@ -29,9 +29,9 @@ namespace ActiveLucene.Net.Tests
         private readonly string _basePath = Path.Combine(Environment.CurrentDirectory, "index");
         private readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
 
-        private IndexManager GetOpenIndexManager()
+        private IndexManager<object> GetOpenIndexManager()
         {
-            var indexManager = new IndexManager(_basePath, _analyzer, false);
+            var indexManager = new IndexManager<object>(_basePath, _analyzer, false);
             indexManager.Open();
             return indexManager;
         }
@@ -46,7 +46,7 @@ namespace ActiveLucene.Net.Tests
         [Test]
         public void CanCreate()
         {
-            var indexManager = new IndexManager(_basePath, _analyzer, false);
+            var indexManager = new IndexManager<object>(_basePath, _analyzer, false);
             Assert.IsNotNull(indexManager);
         }
 
@@ -67,7 +67,7 @@ namespace ActiveLucene.Net.Tests
         public void CanRebuildRepository()
         {
             var indexManager = GetOpenIndexManager();
-            indexManager.OnRebuildRepository += delegate(IndexWriter indexWriter, object state)
+            indexManager.OnRebuildRepository += delegate(DisposableIndexWriter<object> indexWriter, object state)
                                                     {
                                                         var doc = new Document();
                                                         doc.Add(new Field("rebuilding", "yes", Field.Store.YES, Field.Index.NOT_ANALYZED));
@@ -139,7 +139,7 @@ namespace ActiveLucene.Net.Tests
         [Test]
         public void CanHandleExceptionDuringRebuild()
         {
-            var indexManager = new IndexManager(_basePath, _analyzer, false);
+            var indexManager = new IndexManager<object>(_basePath, _analyzer, false);
             indexManager.Open();
 
             Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));

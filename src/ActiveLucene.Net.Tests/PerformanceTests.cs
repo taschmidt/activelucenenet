@@ -19,7 +19,7 @@ using NUnit.Framework;
 
 namespace ActiveLucene.Net.Tests
 {
-    [TestFixture]
+    [TestFixture, Ignore("Don't need to run perf tests every time.")]
     public class PerformanceTests
     {
         [Test]
@@ -28,7 +28,7 @@ namespace ActiveLucene.Net.Tests
             PerfTest(LuceneMediator<TestRecord>.ToDocument, LuceneMediator<TestRecord>.ToRecord);
         }
 
-        [Test, Ignore("No need to run the slow reflection one every time.")]
+        [Test]
         public void ReflectionPropertyInfoPerfTest()
         {
             var dataProp = typeof (TestRecord).GetProperty("Data");

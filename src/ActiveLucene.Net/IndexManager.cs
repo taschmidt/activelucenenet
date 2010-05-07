@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -26,13 +27,13 @@ using Version = Lucene.Net.Util.Version;
 
 namespace ActiveLucene.Net
 {
-    public interface IIndexManager
+    public interface IIndexManager<T> where T : class
     {
         void BeginRebuildRepository(object state);
         void RebuildRepository(object state);
 
-        event Action<IndexWriter, object> OnRebuildRepository;
-        event Action<IndexSearcher> OnWarmUpIndex;
+        event RebuildRepositoryDelegate<T> OnRebuildRepository;
+        event WarmUpIndexDelegate<T> OnWarmUpIndex;
 
         bool IsOpen { get; }
         string CurrentIndexPath { get; }
@@ -45,19 +46,24 @@ namespace ActiveLucene.Net
         void VerifyReader();
         void CleanUpDirectories();
 
-        DisposableIndexSearcher GetIndexSearcher();
-        DisposableIndexWriter GetIndexWriter();
+        DisposableIndexSearcher<T> GetIndexSearcher();
+        DisposableIndexWriter<T> GetIndexWriter();
+        T GetRecord(int doc);
     }
 
-    public class IndexManager : IIndexManager
-    {
-        protected readonly object _rebuildLock = new object();
-        protected readonly object _maintenanceLock = new object();
+    public delegate void RebuildRepositoryDelegate<T>(DisposableIndexWriter<T> indexWriter, object context) where T : class;
 
-        protected readonly string _basePath;
-        protected readonly Analyzer _analyzer;
-        protected readonly bool _readOnly;
-        protected LockableIndexSearcher _indexSearcher;
+    public delegate void WarmUpIndexDelegate<T>(DisposableIndexSearcher<T> indexSearcher) where T : class;
+
+    public class IndexManager<T> : IIndexManager<T> where T : class
+    {
+        private readonly object _rebuildLock = new object();
+        private readonly object _maintenanceLock = new object();
+
+        private readonly string _basePath;
+        private readonly Analyzer _analyzer;
+        private readonly bool _readOnly;
+        private LockableIndexSearcher _indexSearcher;
 
         public IndexManager(string basePath) : this(basePath, new StandardAnalyzer(Version.LUCENE_CURRENT), false)
         {}
@@ -75,19 +81,19 @@ namespace ActiveLucene.Net
             _readOnly = readOnly;
         }
 
-        public void BeginRebuildRepository(object state)
+        public void BeginRebuildRepository(object context)
         {
             var dlg = new Action<object>(RebuildRepository);
-            dlg.BeginInvoke(state, EndRebuildRepository, dlg);
+            dlg.BeginInvoke(context, EndRebuildRepository, dlg);
         }
 
         protected static void EndRebuildRepository(IAsyncResult ar)
         {
-            var dlg = ar.AsyncState as Action<object>;
+            var dlg = (Action<object>)ar.AsyncState;
             dlg.EndInvoke(ar);
         }
 
-        public void RebuildRepository(object state)
+        public void RebuildRepository(object context)
         {
             if(OnRebuildRepository == null)
                 return;
@@ -98,23 +104,29 @@ namespace ActiveLucene.Net
             try
             {
                 var buildingPath = Path.Combine(_basePath, "building" + Guid.NewGuid().ToString("n"));
-                var indexWriter = new IndexWriter(FSDirectory.Open(new DirectoryInfo(buildingPath)),
-                                                  _analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
 
-                try
+                var writer = new IndexWriter(FSDirectory.Open(new DirectoryInfo(buildingPath)),
+                    _analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
+                writer.Close();
+
+                var indexSearcher = new LockableIndexSearcher(buildingPath, false);
+                using (var indexWriter = GetIndexWriter(indexSearcher, null))
                 {
-                    OnRebuildRepository(indexWriter, state);
-                }
-                catch(Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex);
-                    indexWriter.Close();
-                    CleanUpDirectories();
-                    return;
+                    try
+                    {
+                        OnRebuildRepository(indexWriter, context);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex);
+                        indexWriter.Dispose();
+                        CleanUpDirectories();
+                        return;
+                    }
+
+                    indexWriter.Optimize();
                 }
 
-                indexWriter.Optimize();
-                indexWriter.Close();
                 Directory.Move(buildingPath, NextHighestNumberedFolder());
                 OpenBestRepository();
             }
@@ -124,8 +136,8 @@ namespace ActiveLucene.Net
             }
         }
 
-        public event Action<IndexWriter, object> OnRebuildRepository;
-        public event Action<IndexSearcher> OnWarmUpIndex;
+        public event RebuildRepositoryDelegate<T> OnRebuildRepository;
+        public event WarmUpIndexDelegate<T> OnWarmUpIndex;
 
         public bool IsOpen
         {
@@ -217,7 +229,7 @@ namespace ActiveLucene.Net
                 var newIndexSearcher = new LockableIndexSearcher(bestFolder, _readOnly);
                 if(OnWarmUpIndex != null)
                 {
-                    using(var indexSearcher = new DisposableIndexSearcher(newIndexSearcher))
+                    using(var indexSearcher = new DisposableIndexSearcher<T>(newIndexSearcher))
                     {
                         OnWarmUpIndex(indexSearcher);
                     }
@@ -304,26 +316,39 @@ namespace ActiveLucene.Net
 
         public string CurrentIndexPath { get; private set; }
 
-        public DisposableIndexSearcher GetIndexSearcher()
+        public DisposableIndexSearcher<T> GetIndexSearcher()
         {
             using (_indexSearcher.GetReadLock())
             {
                 CheckOpen();
-                return new DisposableIndexSearcher(_indexSearcher, 5000);
+                return new DisposableIndexSearcher<T>(_indexSearcher, 5000);
             }
         }
 
-        public DisposableIndexWriter GetIndexWriter()
+        public DisposableIndexWriter<T> GetIndexWriter()
         {
             return GetIndexWriter(true);
         }
 
-        public DisposableIndexWriter GetIndexWriter(bool shouldVerifyOnExit)
+        public DisposableIndexWriter<T> GetIndexWriter(bool shouldVerifyOnExit)
         {
             using (_indexSearcher.GetWriteLock())
             {
                 CheckOpen();
-                return new DisposableIndexWriter(_indexSearcher, _analyzer, shouldVerifyOnExit ? VerifyReader : (Action) null);
+                return GetIndexWriter(_indexSearcher, shouldVerifyOnExit ? VerifyReader : (Action) null);
+            }
+        }
+
+        internal DisposableIndexWriter<T> GetIndexWriter(LockableIndexSearcher indexSearcher, Action onExit)
+        {
+            return new DisposableIndexWriter<T>(indexSearcher, _analyzer, onExit);
+        }
+
+        public T GetRecord(int doc)
+        {
+            using (var searcher = GetIndexSearcher())
+            {
+                return LuceneMediator<T>.ToRecord(searcher.Doc(doc));
             }
         }
 
@@ -331,44 +356,6 @@ namespace ActiveLucene.Net
         {
             if (!IsOpen)
                 throw new Exception("Index is closed.");
-        }
-    }
-
-    public interface IIndexManager<T> : IIndexManager
-    {
-        T GetRecord(int doc);
-    }
-
-    public class IndexManager<T> : IndexManager, IIndexManager<T> where T : class
-    {
-        public IndexManager(string basePath, Analyzer analyzer)
-            : base(basePath, analyzer)
-        {}
-
-        public IndexManager(string basePath, Analyzer analyzer, bool readOnly)
-            : base(basePath, analyzer, readOnly)
-        {}
-
-        public T GetRecord(int doc)
-        {
-            using(var searcher = GetIndexSearcher())
-            {
-                return LuceneMediator<T>.ToRecord(searcher.Doc(doc));
-            }
-        }
-
-        public new DisposableIndexWriter<T> GetIndexWriter()
-        {
-            return GetIndexWriter(true);
-        }
-
-        public new DisposableIndexWriter<T> GetIndexWriter(bool shouldVerifyOnExit)
-        {
-            using (_indexSearcher.GetWriteLock())
-            {
-                CheckOpen();
-                return new DisposableIndexWriter<T>(_indexSearcher, _analyzer, shouldVerifyOnExit ? VerifyReader : (Action)null);
-            }
         }
     }
 }

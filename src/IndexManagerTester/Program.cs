@@ -26,7 +26,7 @@ namespace IndexManagerTester
 {
     class Program
     {
-        private static IndexManager _indexManager;
+        private static IndexManager<TestRecord> _indexManager;
         private static readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
         private static bool _done;
         private static readonly Random _random = new Random();
@@ -36,7 +36,7 @@ namespace IndexManagerTester
             var indexPath = Path.Combine(Environment.CurrentDirectory, "index");
 
             Console.WriteLine("Creating IndexManager...");
-            _indexManager = new IndexManager(indexPath, _analyzer, false);
+            _indexManager = new IndexManager<TestRecord>(indexPath, _analyzer, false);
             _indexManager.Open(true);
 
             var fxn = new Action(WriterProc);
@@ -109,9 +109,7 @@ namespace IndexManagerTester
 
                     for (var i = 0; i < count; i++)
                     {
-                        var doc = new Document();
-                        doc.Add(new Field("test-field", GetRandomValue(), Field.Store.YES, Field.Index.NOT_ANALYZED));
-                        writer.AddDocument(doc);
+                        writer.AddRecord(new TestRecord {TestField = GetRandomValue()});
                     }
 
                     Console.WriteLine("\nAdded {0} documents...", count);
@@ -126,5 +124,11 @@ namespace IndexManagerTester
                 Thread.Sleep(_random.Next(500, 1500));
             }
         }
+    }
+
+    public class TestRecord
+    {
+        [LuceneField("test-field", StorageBehavior.Store, IndexBehavior.DoNotAnalyze)]
+        public string TestField { get; set; }
     }
 }

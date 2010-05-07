@@ -17,7 +17,7 @@ using Lucene.Net.Search;
 
 namespace ActiveLucene.Net
 {
-    public class DisposableIndexSearcher : IndexSearcher, IDisposable
+    public class DisposableIndexSearcher<T> : IndexSearcher, IDisposable where T : class
     {
         private IDisposable _readLock;
 
