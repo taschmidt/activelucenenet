@@ -26,16 +26,12 @@ namespace ActiveLucene.Net
         private IDisposable _writeLock;
         private readonly Document _document = new Document();
 
-        internal DisposableIndexWriter(LockableIndexSearcher indexSearcher, Analyzer analyzer, Action onExit)
+        internal DisposableIndexWriter(IDisposable writeLock, LockableIndexSearcher indexSearcher, Analyzer analyzer, Action onExit)
             : base(indexSearcher.GetIndexReader().Directory(), analyzer, MaxFieldLength.LIMITED)
         {
             _onExit = onExit;
-            _writeLock = indexSearcher.GetWriteLock();
+            _writeLock = writeLock;
         }
-
-        internal DisposableIndexWriter(Directory directory, Analyzer analyzer, bool create)
-            : base(directory, analyzer, create, MaxFieldLength.LIMITED)
-        { }
 
         ~DisposableIndexWriter()
         {

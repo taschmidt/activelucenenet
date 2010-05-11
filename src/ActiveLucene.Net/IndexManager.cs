@@ -229,7 +229,7 @@ namespace ActiveLucene.Net
                 var newIndexSearcher = new LockableIndexSearcher(bestFolder, _readOnly);
                 if(OnWarmUpIndex != null)
                 {
-                    using(var indexSearcher = new DisposableIndexSearcher<T>(newIndexSearcher))
+                    using(var indexSearcher = new DisposableIndexSearcher<T>(newIndexSearcher.GetReadLock(), newIndexSearcher))
                     {
                         OnWarmUpIndex(indexSearcher);
                     }
@@ -318,11 +318,14 @@ namespace ActiveLucene.Net
 
         public DisposableIndexSearcher<T> GetIndexSearcher()
         {
-            using (_indexSearcher.GetReadLock())
-            {
-                CheckOpen();
-                return new DisposableIndexSearcher<T>(_indexSearcher);
-            }
+            CheckOpen();
+            return new DisposableIndexSearcher<T>(_indexSearcher.GetReadLock(), _indexSearcher);
+        }
+
+        public DisposableIndexSearcher<T> GetIndexSearcher(int millisecondsTimeout)
+        {
+            CheckOpen();
+            return new DisposableIndexSearcher<T>(_indexSearcher.GetReadLock(millisecondsTimeout), _indexSearcher);
         }
 
         public DisposableIndexWriter<T> GetIndexWriter()
@@ -332,16 +335,13 @@ namespace ActiveLucene.Net
 
         public DisposableIndexWriter<T> GetIndexWriter(bool shouldVerifyOnExit)
         {
-            using (_indexSearcher.GetWriteLock())
-            {
-                CheckOpen();
-                return GetIndexWriter(_indexSearcher, shouldVerifyOnExit ? VerifyReader : (Action) null);
-            }
+            CheckOpen();
+            return GetIndexWriter(_indexSearcher, shouldVerifyOnExit ? VerifyReader : (Action) null);
         }
 
         internal DisposableIndexWriter<T> GetIndexWriter(LockableIndexSearcher indexSearcher, Action onExit)
         {
-            return new DisposableIndexWriter<T>(indexSearcher, _analyzer, onExit);
+            return new DisposableIndexWriter<T>(indexSearcher.GetWriteLock(), indexSearcher, _analyzer, onExit);
         }
 
         public T GetRecord(int doc)
