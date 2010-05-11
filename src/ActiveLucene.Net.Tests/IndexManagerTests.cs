@@ -179,5 +179,31 @@ namespace ActiveLucene.Net.Tests
 
             indexManager.Close();
         }
+
+        [Test]
+        public void TestReadLockTimeout()
+        {
+            var indexManager = GetOpenIndexManager();
+            
+            using (indexManager.GetIndexWriter())
+            {
+                Action dlg = () => indexManager.GetIndexSearcher(1000);
+                var ar = dlg.BeginInvoke(null, null);
+                Assert.That(() => dlg.EndInvoke(ar), Throws.TypeOf<TimeoutException>());
+            }
+        }
+
+        [Test]
+        public void TestWriteLockTimeout()
+        {
+            var indexManager = GetOpenIndexManager();
+
+            using (indexManager.GetIndexSearcher())
+            {
+                Action dlg = () => indexManager.GetIndexWriter(1000);
+                var ar = dlg.BeginInvoke(null, null);
+                Assert.That(() => dlg.EndInvoke(ar), Throws.TypeOf<TimeoutException>());
+            }
+        }
     }
 }
