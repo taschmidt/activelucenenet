@@ -187,7 +187,7 @@ namespace ActiveLucene.Net.Tests
             
             using (indexManager.GetIndexWriter())
             {
-                Action dlg = () => indexManager.GetIndexSearcher(1000);
+                Action dlg = () => indexManager.GetIndexSearcher(100);
                 var ar = dlg.BeginInvoke(null, null);
                 Assert.That(() => dlg.EndInvoke(ar), Throws.TypeOf<TimeoutException>());
             }
@@ -200,7 +200,7 @@ namespace ActiveLucene.Net.Tests
 
             using (indexManager.GetIndexSearcher())
             {
-                Action dlg = () => indexManager.GetIndexWriter(1000);
+                Action dlg = () => indexManager.GetIndexWriter(100);
                 var ar = dlg.BeginInvoke(null, null);
                 Assert.That(() => dlg.EndInvoke(ar), Throws.TypeOf<TimeoutException>());
             }
