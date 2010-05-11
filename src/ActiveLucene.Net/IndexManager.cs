@@ -321,7 +321,7 @@ namespace ActiveLucene.Net
             using (_indexSearcher.GetReadLock())
             {
                 CheckOpen();
-                return new DisposableIndexSearcher<T>(_indexSearcher, 5000);
+                return new DisposableIndexSearcher<T>(_indexSearcher);
             }
         }
 

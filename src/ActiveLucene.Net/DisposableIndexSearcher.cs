@@ -22,13 +22,13 @@ namespace ActiveLucene.Net
         private IDisposable _readLock;
 
         internal DisposableIndexSearcher(LockableIndexSearcher indexSearcher)
-            : base(indexSearcher.GetIndexReader())
+            : base(indexSearcher.GetIndexReader().Directory(), true)
         {
             _readLock = indexSearcher.GetReadLock();
         }
 
         internal DisposableIndexSearcher(LockableIndexSearcher indexSearcher, int millisecondsTimeout)
-            : base(indexSearcher.GetIndexReader())
+            : base(indexSearcher.GetIndexReader().Directory(), true)
         {
             _readLock = indexSearcher.GetReadLock(millisecondsTimeout);
         }
