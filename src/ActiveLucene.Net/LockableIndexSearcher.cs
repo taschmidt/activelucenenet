@@ -49,6 +49,11 @@ namespace ActiveLucene.Net
             return new WriteLock(_readWriteLock);
         }
 
+        public IDisposable GetWriteLock(int millisecondsTimeout)
+        {
+            return new WriteLock(_readWriteLock, millisecondsTimeout);
+        }
+
         internal class ReadLock : IDisposable
         {
             private ReaderWriterLockSlim _readWriteLock;
@@ -56,14 +61,14 @@ namespace ActiveLucene.Net
             internal ReadLock(ReaderWriterLockSlim readWriteLock)
             {
                 _readWriteLock = readWriteLock;
-                _readWriteLock.EnterReadLock();
+                _readWriteLock.EnterUpgradeableReadLock();
             }
 
             internal ReadLock(ReaderWriterLockSlim readWriteLock, int millisecondsTimeout)
             {
                 _readWriteLock = readWriteLock;
-                if(!_readWriteLock.TryEnterReadLock(millisecondsTimeout))
-                    throw new Exception("Failed to obtain read lock.");
+                if(!_readWriteLock.TryEnterUpgradeableReadLock(millisecondsTimeout))
+                    throw new Exception("Timed out obtaining read lock.");
             }
 
             ~ReadLock()
@@ -75,7 +80,7 @@ namespace ActiveLucene.Net
             {
                 if (_readWriteLock != null)
                 {
-                    _readWriteLock.ExitReadLock();
+                    _readWriteLock.ExitUpgradeableReadLock();
                     _readWriteLock = null;
                 }
             }
@@ -89,6 +94,13 @@ namespace ActiveLucene.Net
             {
                 _readWriteLock = readWriteLock;
                 _readWriteLock.EnterWriteLock();
+            }
+
+            internal WriteLock(ReaderWriterLockSlim readWriteLock, int millisecondsTimeout)
+            {
+                _readWriteLock = readWriteLock;
+                if (!_readWriteLock.TryEnterWriteLock(millisecondsTimeout))
+                    throw new Exception("Timed out obtaining write lock.");
             }
 
             ~WriteLock()

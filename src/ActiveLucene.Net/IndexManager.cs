@@ -110,7 +110,7 @@ namespace ActiveLucene.Net
                 writer.Close();
 
                 var indexSearcher = new LockableIndexSearcher(buildingPath, false);
-                using (var indexWriter = GetIndexWriter(indexSearcher, null))
+                using (var indexWriter = GetIndexWriter(indexSearcher, Timeout.Infinite, null))
                 {
                     try
                     {
@@ -330,18 +330,28 @@ namespace ActiveLucene.Net
 
         public DisposableIndexWriter<T> GetIndexWriter()
         {
-            return GetIndexWriter(true);
+            return GetIndexWriter(true, Timeout.Infinite);
+        }
+
+        public DisposableIndexWriter<T> GetIndexWriter(int millisecondsTimeout)
+        {
+            return GetIndexWriter(true, millisecondsTimeout);
         }
 
         public DisposableIndexWriter<T> GetIndexWriter(bool shouldVerifyOnExit)
         {
-            CheckOpen();
-            return GetIndexWriter(_indexSearcher, shouldVerifyOnExit ? VerifyReader : (Action) null);
+            return GetIndexWriter(shouldVerifyOnExit, Timeout.Infinite);
         }
 
-        internal DisposableIndexWriter<T> GetIndexWriter(LockableIndexSearcher indexSearcher, Action onExit)
+        public DisposableIndexWriter<T> GetIndexWriter(bool shouldVerifyOnExit, int millisecondsTimeout)
         {
-            return new DisposableIndexWriter<T>(indexSearcher.GetWriteLock(), indexSearcher, _analyzer, onExit);
+            CheckOpen();
+            return GetIndexWriter(_indexSearcher, millisecondsTimeout, shouldVerifyOnExit ? VerifyReader : (Action) null);
+        }
+
+        internal DisposableIndexWriter<T> GetIndexWriter(LockableIndexSearcher indexSearcher, int millisecondsTimeout, Action onExit)
+        {
+            return new DisposableIndexWriter<T>(indexSearcher.GetWriteLock(millisecondsTimeout), indexSearcher, _analyzer, onExit);
         }
 
         public T GetRecord(int doc)
