@@ -176,15 +176,12 @@ namespace ActiveLucene.Net
         {
             if (IsOpen)
             {
-                lock (_maintenanceLock)
+                using (_indexSearcher.GetWriteLock())
                 {
-                    using (_indexSearcher.GetWriteLock())
-                    {
-                        _indexSearcher.Close();
-                    }
-
-                    _indexSearcher = null;
+                    _indexSearcher.Close();
                 }
+
+                _indexSearcher = null;
             }
         }
 
