@@ -40,13 +40,13 @@ namespace ActiveLucene.Net
 
         public void Dispose()
         {
-            Close();
-
-            if (_onExit != null)
-                _onExit();
-
             if (_writeLock != null)
             {
+                Close();
+
+                if (_onExit != null)
+                    _onExit();
+
                 _writeLock.Dispose();
                 _writeLock = null;
             }
