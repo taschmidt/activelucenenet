@@ -48,7 +48,7 @@
     <foreach item="File" property="filename">
       <in>
         <items>
-          <include name="src\**\AssemblyInfo.cs"/>
+          <include name="src\**\*AssemblyInfo.cs"/>
         </items>
       </in>
       <do>
