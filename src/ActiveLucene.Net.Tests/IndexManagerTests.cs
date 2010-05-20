@@ -73,8 +73,14 @@ namespace ActiveLucene.Net.Tests
                                                         doc.Add(new Field("rebuilding", "yes", Field.Store.YES, Field.Index.NOT_ANALYZED));
                                                         indexWriter.AddDocument(doc);
                                                     };
+            var repositoryRebuiltCalled = false;
+            indexManager.OnRepositoryRebuilt += delegate(object state)
+                                                    {
+                                                        repositoryRebuiltCalled = true;
+                                                    };
             indexManager.RebuildRepository(null);
             Assert.True(indexManager.CurrentIndexPath.EndsWith("2"));
+            Assert.True(repositoryRebuiltCalled);
 
             using(var indexSearcher = indexManager.GetIndexSearcher())
             {

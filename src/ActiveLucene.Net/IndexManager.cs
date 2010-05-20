@@ -33,6 +33,7 @@ namespace ActiveLucene.Net
         void RebuildRepository(object state);
 
         event RebuildRepositoryDelegate<T> OnRebuildRepository;
+        event RepositoryRebuiltDelegate OnRepositoryRebuilt;
         event WarmUpIndexDelegate<T> OnWarmUpIndex;
 
         bool IsOpen { get; }
@@ -52,8 +53,9 @@ namespace ActiveLucene.Net
     }
 
     public delegate void RebuildRepositoryDelegate<T>(DisposableIndexWriter<T> indexWriter, object context) where T : class;
-
+    public delegate void RepositoryRebuiltDelegate(object context);
     public delegate void WarmUpIndexDelegate<T>(DisposableIndexSearcher<T> indexSearcher) where T : class;
+
 
     public class IndexManager<T> : IIndexManager<T> where T : class
     {
@@ -129,6 +131,8 @@ namespace ActiveLucene.Net
 
                 Directory.Move(buildingPath, NextHighestNumberedFolder());
                 OpenBestRepository();
+
+                OnRepositoryRebuilt(context);
             }
             finally
             {
@@ -137,6 +141,7 @@ namespace ActiveLucene.Net
         }
 
         public event RebuildRepositoryDelegate<T> OnRebuildRepository;
+        public event RepositoryRebuiltDelegate OnRepositoryRebuilt;
         public event WarmUpIndexDelegate<T> OnWarmUpIndex;
 
         public bool IsOpen
