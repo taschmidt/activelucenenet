@@ -19,6 +19,7 @@ using ActiveLucene.Net;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
+using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Version = Lucene.Net.Util.Version;
 
@@ -112,13 +113,19 @@ namespace IndexManagerTester
                         writer.AddRecord(new TestRecord {TestField = GetRandomValue()});
                     }
 
-                    Console.WriteLine("\nAdded {0} documents...", count);
+                    Console.WriteLine("\nAdded {0} documents ({1} total)...", count, writer.MaxDoc());
+                }
 
-                    if(_random.Next(1, 10) == 5)
+                if (_random.Next(1, 10) == 5)
+                {
+                    Console.WriteLine("\nOptimizing...");
+                    using (var searcher = _indexManager.GetIndexSearcher())
                     {
-                        Console.WriteLine("Optimizing...");
+                        var writer = new IndexWriter(searcher.GetIndexReader().Directory(), null, IndexWriter.MaxFieldLength.LIMITED);
                         writer.Optimize();
+                        writer.Close();
                     }
+                    Console.WriteLine("\nOptimization complete.");
                 }
 
                 Thread.Sleep(_random.Next(500, 1500));
