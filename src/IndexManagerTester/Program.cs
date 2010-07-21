@@ -123,6 +123,7 @@ namespace IndexManagerTester
                     {
                         var writer = new IndexWriter(searcher.GetIndexReader().Directory(), null, IndexWriter.MaxFieldLength.LIMITED);
                         writer.Optimize();
+                        Thread.Sleep(TimeSpan.FromSeconds(15));
                         writer.Close();
                     }
                     Console.WriteLine("\nOptimization complete.");

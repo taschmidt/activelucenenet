@@ -60,13 +60,13 @@ namespace ActiveLucene.Net
 
             internal ReadLock(ReaderWriterLockSlim readWriteLock)
             {
-                readWriteLock.EnterUpgradeableReadLock();
+                readWriteLock.EnterReadLock();
                 _readWriteLock = readWriteLock;
             }
 
             internal ReadLock(ReaderWriterLockSlim readWriteLock, int millisecondsTimeout)
             {
-                if(!readWriteLock.TryEnterUpgradeableReadLock(millisecondsTimeout))
+                if(!readWriteLock.TryEnterReadLock(millisecondsTimeout))
                     throw new TimeoutException("Timed out obtaining read lock.");
                 _readWriteLock = readWriteLock;
             }
@@ -80,7 +80,7 @@ namespace ActiveLucene.Net
             {
                 if (_readWriteLock != null)
                 {
-                    _readWriteLock.ExitUpgradeableReadLock();
+                    _readWriteLock.ExitReadLock();
                     _readWriteLock = null;
                 }
             }
