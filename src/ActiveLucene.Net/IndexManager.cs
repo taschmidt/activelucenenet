@@ -132,7 +132,7 @@ namespace ActiveLucene.Net
                 Directory.Move(buildingPath, NextHighestNumberedFolder());
                 OpenBestRepository();
 
-                if (OnRebuildRepository != null)
+                if (OnRepositoryRebuilt != null)
                     OnRepositoryRebuilt(context);
             }
             finally

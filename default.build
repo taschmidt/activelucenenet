@@ -84,7 +84,7 @@
 
   <target name="upload-google-code">
     <loadfile file="gcpwd.txt" property="gc.password" failonerror="true"/>
-    <gcupload username="tim@schmidthole.com"
+    <gcupload username="taschmidt1977"
               password="${gc.password}"
               projectname="activelucenenet"
               filename="${zip.file}"
