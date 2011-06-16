@@ -60,7 +60,7 @@
           </imports>
           <attributes>
             <attribute type="AssemblyProductAttribute" value="${project::get-name()}"/>
-            <attribute type="AssemblyCopyrightAttribute" value="Copyright ©  2010"/>
+            <attribute type="AssemblyCopyrightAttribute" value="Copyright ©  2010-2011"/>
             <attribute type="AssemblyVersionAttribute" value="${product.version}"/>
             <attribute type="AssemblyFileVersionAttribute" value="${product.version}"/>
             <attribute type="AssemblyInformationalVersionAttribute" value="${product.major}.${product.minor}"/>
@@ -84,7 +84,7 @@
 
   <target name="upload-google-code">
     <loadfile file="gcpwd.txt" property="gc.password" failonerror="true"/>
-    <gcupload username="taschmidt1977"
+    <gcupload username="tim@schmidthole.com"
               password="${gc.password}"
               projectname="activelucenenet"
               filename="${zip.file}"
