@@ -26,6 +26,8 @@ namespace ActiveLucene.Net.Tests
         [LuceneField("data2")]
         public string Data2 { get; set; }
 
+        [LuceneDocumentBoost]
+        public float Boost { get; set; }
     }
 
     public class NumericRecord
@@ -71,5 +73,17 @@ namespace ActiveLucene.Net.Tests
     {
         [LuceneField("bool")]
         public bool Boolean { get; set; }
+
+        [LuceneDocumentBoost]
+        public string Boost { get; set; }
+    }
+
+    public class TwoBoostsRecord
+    {
+        [LuceneDocumentBoost]
+        public float Boost1 { get; set; }
+
+        [LuceneDocumentBoost]
+        public float Boost2 { get; set; }
     }
 }

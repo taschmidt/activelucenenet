@@ -43,12 +43,12 @@ namespace ActiveLucene.Net
         Year
     }
 
-    [AttributeUsage(AttributeTargets.All)]
+    [AttributeUsage(AttributeTargets.Class|AttributeTargets.Struct)]
     public class LuceneDocumentAttribute : Attribute
     {
     }
 
-    [AttributeUsage(AttributeTargets.All)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class LuceneFieldAttribute : Attribute
     {
         public string Name;
@@ -66,5 +66,10 @@ namespace ActiveLucene.Net
             StorageBehavior = storageBehavior;
             IndexBehavior = indexBehavior;
         }
+    }
+
+    [AttributeUsage(AttributeTargets.Field|AttributeTargets.Property)]
+    public class LuceneDocumentBoostAttribute : Attribute
+    {
     }
 }

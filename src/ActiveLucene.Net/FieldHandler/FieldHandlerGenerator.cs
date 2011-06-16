@@ -18,6 +18,7 @@ using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using Lucene.Net.Documents;
 using Microsoft.CSharp;
@@ -85,9 +86,33 @@ namespace ActiveLucene.Net.FieldHandler
                                           }
                                   };
 
+            var docBoostProperty = false;
+
             foreach (var propertyInfo in typeof(T).GetProperties())
             {
-                var attribute = propertyInfo.GetCustomAttributes(typeof(LuceneFieldAttribute), false)
+                var docBoostAttribute = propertyInfo.GetCustomAttributes(typeof (LuceneDocumentBoostAttribute), true)
+                    .FirstOrDefault();
+
+                if (docBoostAttribute != null)
+                {
+                    if (docBoostProperty)
+                        throw new Exception("More than one property with LuceneDocumentBoostAttribute specified!");
+
+                    if (propertyInfo.PropertyType != typeof(float))
+                    {
+                        documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = ({1})Convert.ChangeType(doc.GetBoost(), typeof({1}));", propertyInfo.Name, propertyInfo.PropertyType)));
+                        recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\tdoc.SetBoost(Convert.ToSingle(record.{0}));", propertyInfo.Name)));
+                    }
+                    else
+                    {
+                        documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = doc.GetBoost();", propertyInfo.Name)));
+                        recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\tdoc.SetBoost(record.{0});", propertyInfo.Name)));
+                    }
+
+                    docBoostProperty = true;
+                }
+
+                var attribute = propertyInfo.GetCustomAttributes(typeof(LuceneFieldAttribute), true)
                     .Cast<LuceneFieldAttribute>()
                     .FirstOrDefault();
 

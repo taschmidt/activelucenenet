@@ -31,8 +31,8 @@ namespace ActiveLucene.Net.Tests
             var doc = LuceneMediator<TestRecord>.ToDocument(obj);
 
             var obj2 = LuceneMediator<TestRecord>.ToRecord(doc);
-            Assert.AreEqual(obj2.Data, "foo");
-            Assert.AreEqual(obj2.Data2, "bar");
+            Assert.That(obj2.Data, Is.EqualTo("foo"));
+            Assert.That(obj2.Data2, Is.EqualTo("bar"));
         }
 
         [Test]
@@ -48,10 +48,10 @@ namespace ActiveLucene.Net.Tests
             var doc = LuceneMediator<NumericRecord>.ToDocument(obj);
 
             var obj2 = LuceneMediator<NumericRecord>.ToRecord(doc);
-            Assert.AreEqual(obj2.IntField, 1);
-            Assert.AreEqual(obj2.LongField, 2);
-            Assert.AreEqual(obj2.FloatField, 3.5f);
-            Assert.AreEqual(obj2.DoubleField, 4.5);
+            Assert.That(obj2.IntField, Is.EqualTo(1));
+            Assert.That(obj2.LongField, Is.EqualTo(2));
+            Assert.That(obj2.FloatField, Is.EqualTo(3.5f));
+            Assert.That(obj2.DoubleField, Is.EqualTo(4.5));
         }
 
         [Test]
@@ -62,7 +62,7 @@ namespace ActiveLucene.Net.Tests
             var doc = LuceneMediator<DateRecord>.ToDocument(obj);
 
             var obj2 = LuceneMediator<DateRecord>.ToRecord(doc);
-            Assert.AreEqual(DateTools.Round(dt, DateTools.Resolution.SECOND), obj2.Date);
+            Assert.That(obj2.Date, Is.EqualTo(DateTools.Round(dt, DateTools.Resolution.SECOND)));
         }
 
         [Test]
@@ -73,7 +73,7 @@ namespace ActiveLucene.Net.Tests
             var doc = LuceneMediator<DateRecord>.ToDocument(obj);
 
             var obj2 = LuceneMediator<DateRecord>.ToRecord(doc);
-            Assert.AreEqual(DateTools.Round(dt, DateTools.Resolution.DAY), obj2.DateDay);
+            Assert.That(obj2.DateDay, Is.EqualTo(DateTools.Round(dt, DateTools.Resolution.DAY)));
         }
 
         [Test]
@@ -108,23 +108,23 @@ namespace ActiveLucene.Net.Tests
             var doc = LuceneMediator<CollectionRecord>.ToDocument(obj);
 
             var obj2 = LuceneMediator<CollectionRecord>.ToRecord(doc);
-            Assert.That(obj2.NumberList, new CollectionEquivalentConstraint(obj.NumberList));
-            Assert.That(obj2.StringArray, new CollectionEquivalentConstraint(obj.StringArray));
-            Assert.That(obj2.ArrayList, new CollectionEquivalentConstraint(obj.ArrayList));
+            Assert.That(obj2.NumberList, Is.EquivalentTo(obj.NumberList));
+            Assert.That(obj2.StringArray, Is.EquivalentTo(obj.StringArray));
+            Assert.That(obj2.ArrayList, Is.EquivalentTo(obj.ArrayList));
         }
 
         [Test]
         public void CanHandleNulls()
         {
             var obj = new TestRecord();
-            Assert.That(delegate { LuceneMediator<TestRecord>.ToDocument(obj); }, new ThrowsNothingConstraint());
+            Assert.That(new TestDelegate(() => LuceneMediator<TestRecord>.ToDocument(obj)), Throws.Nothing);
 
             var obj2 = new CollectionRecord();
-            Assert.That(delegate { LuceneMediator<CollectionRecord>.ToDocument(obj2); }, new ThrowsNothingConstraint());
+            Assert.That(new TestDelegate(() => LuceneMediator<CollectionRecord>.ToDocument(obj2)), Throws.Nothing);
 
             // this shouldn't even matter since they're all value types but might as well test it
             var obj3 = new NumericRecord();
-            Assert.That(delegate { LuceneMediator<NumericRecord>.ToDocument(obj3); }, new ThrowsNothingConstraint());
+            Assert.That(new TestDelegate(() => LuceneMediator<NumericRecord>.ToDocument(obj3)), Throws.Nothing);
         }
 
         [Test]
@@ -145,6 +145,35 @@ namespace ActiveLucene.Net.Tests
             var obj = new TestRecord {Data = "foo"};
             var doc = LuceneMediator<TestRecord>.ToDocument(obj);
             Assert.That(!doc.GetFields().Cast<Field>().Any(f => f.Name() == "data2"));
+        }
+
+        [Test]
+        public void DocumentBoost()
+        {
+            var obj = new TestRecord {Boost = 2.0f};
+            var doc = LuceneMediator<TestRecord>.ToDocument(obj);
+            Assert.That(doc.GetBoost(), Is.EqualTo(2.0f));
+
+            var obj2 = LuceneMediator<TestRecord>.ToRecord(doc);
+            Assert.That(obj2.Boost, Is.EqualTo(2.0f));
+        }
+
+        [Test]
+        public void DocumentBoostWithNonFloat()
+        {
+            var obj = new BooleanRecord {Boost = "2"};
+            var doc = LuceneMediator<BooleanRecord>.ToDocument(obj);
+            Assert.That(doc.GetBoost(), Is.EqualTo(2.0f));
+
+            var obj2 = LuceneMediator<BooleanRecord>.ToRecord(doc);
+            Assert.That(obj2.Boost, Is.EqualTo("2"));
+        }
+
+        [Test]
+        public void TwoDocumentBoostsThrowException()
+        {
+            var obj = new TwoBoostsRecord();
+            Assert.That(new TestDelegate(() => LuceneMediator<TwoBoostsRecord>.ToDocument(obj)), Throws.Exception);
         }
     }
 }
