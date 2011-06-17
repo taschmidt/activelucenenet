@@ -23,7 +23,7 @@ namespace ActiveLucene.Net.FieldHandler
 
         public override T StringToValue(string value)
         {
-            return (T) Convert.ChangeType(value, typeof (T));
+            return String.IsNullOrEmpty(value) ? default(T) : (T) Convert.ChangeType(value, typeof (T));
         }
 
         public override string ValueToString(T value)
