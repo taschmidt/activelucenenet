@@ -154,7 +154,7 @@ namespace ActiveLucene.Net.Tests
                                                     {
                                                         throw new Exception("Test");
                                                     };
-            indexManager.RebuildRepository(null);
+            Assert.That(new TestDelegate(() => indexManager.RebuildRepository(null)), Throws.Exception);
 
             Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));
 

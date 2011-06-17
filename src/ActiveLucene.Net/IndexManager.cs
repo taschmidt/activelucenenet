@@ -122,7 +122,7 @@ namespace ActiveLucene.Net
                         Trace.WriteLine(ex);
                         indexWriter.Dispose();
                         CleanUpDirectories();
-                        return;
+                        throw;
                     }
 
                     indexWriter.Optimize();
