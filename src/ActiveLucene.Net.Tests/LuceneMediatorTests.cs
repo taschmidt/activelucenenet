@@ -175,5 +175,18 @@ namespace ActiveLucene.Net.Tests
             var obj = new TwoBoostsRecord();
             Assert.That(new TestDelegate(() => LuceneMediator<TwoBoostsRecord>.ToDocument(obj)), Throws.Exception);
         }
+
+        [Test]
+        public void CheckNullableFields()
+        {
+            var obj = new NullableRecord {Int = 1, Long = 2L, Float = 3.0f, Double = 4.0f};
+            var doc = LuceneMediator<NullableRecord>.ToDocument(obj);
+
+            var obj2 = LuceneMediator<NullableRecord>.ToRecord(doc);
+            Assert.That(obj2.Int, Is.EqualTo(1));
+            Assert.That(obj2.Long, Is.EqualTo(2L));
+            Assert.That(obj2.Float, Is.EqualTo(3.0f));
+            Assert.That(obj2.Double, Is.EqualTo(4.0f));
+        }
     }
 }

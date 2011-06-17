@@ -86,4 +86,19 @@ namespace ActiveLucene.Net.Tests
         [LuceneDocumentBoost]
         public float Boost2 { get; set; }
     }
+
+    public class NullableRecord
+    {
+        [LuceneField("int")]
+        public int? Int { get; set; }
+
+        [LuceneField("long")]
+        public long? Long { get; set; }
+
+        [LuceneField("float")]
+        public float? Float { get; set; }
+
+        [LuceneField("double")]
+        public double? Double { get; set; }
+    }
 }
