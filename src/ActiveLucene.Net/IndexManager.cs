@@ -20,7 +20,6 @@ using System.Threading;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Index;
-using Lucene.Net.Search;
 using Lucene.Net.Store;
 using Directory = System.IO.Directory;
 using Version = Lucene.Net.Util.Version;
@@ -361,7 +360,7 @@ namespace ActiveLucene.Net
         {
             using (var searcher = GetIndexSearcher())
             {
-                return LuceneMediator<T>.ToRecord(searcher.Doc(doc));
+                return searcher.GetRecord(doc);
             }
         }
 

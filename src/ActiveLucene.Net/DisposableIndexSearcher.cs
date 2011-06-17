@@ -41,5 +41,14 @@ namespace ActiveLucene.Net
                 _readLock = null;
             }
         }
+
+        public T GetRecord(int doc)
+        {
+            var document = Doc(doc);
+            if (document == null)
+                return default(T);
+
+            return LuceneMediator<T>.ToRecord(document);
+        }
     }
 }
