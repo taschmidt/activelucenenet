@@ -88,7 +88,7 @@ namespace IndexManagerTester
                         var value = GetRandomValue();
                         var query = parser.Parse(value);
                         var topDocs = searcher.Search(query, 10);
-                        Console.Write("{0}.. ", topDocs.totalHits);
+                        Console.Write("{0}.. ", topDocs.TotalHits);
                     }
                 }
                 catch(Exception ex)
