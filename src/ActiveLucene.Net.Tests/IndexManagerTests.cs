@@ -67,7 +67,7 @@ namespace ActiveLucene.Net.Tests
         public void CanRebuildRepository()
         {
             var indexManager = GetOpenIndexManager();
-            indexManager.OnRebuildRepository += delegate(DisposableIndexWriter<object> indexWriter, object state)
+            indexManager.OnRebuildRepository += delegate(DisposableIndexWriter indexWriter, object state)
                                                     {
                                                         var doc = new Document();
                                                         doc.Add(new Field("rebuilding", "yes", Field.Store.YES, Field.Index.NOT_ANALYZED));

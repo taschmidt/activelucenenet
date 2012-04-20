@@ -17,7 +17,7 @@ using Lucene.Net.Search;
 
 namespace ActiveLucene.Net
 {
-    public class DisposableIndexSearcher<T> : IndexSearcher, IDisposable where T : class
+    public class DisposableIndexSearcher : IndexSearcher, IDisposable
     {
         private IDisposable _readLock;
 
@@ -32,7 +32,7 @@ namespace ActiveLucene.Net
             Dispose();
         }
 
-        public void Dispose()
+        public new void Dispose()
         {
             if (_readLock != null)
             {
@@ -40,6 +40,22 @@ namespace ActiveLucene.Net
                 _readLock.Dispose();
                 _readLock = null;
             }
+        }
+
+        public T GetRecord<T>(int doc) where T : class
+        {
+            var document = Doc(doc);
+            if (document == null)
+                return default(T);
+
+            return LuceneMediator<T>.ToRecord(document);
+        }
+    }
+
+    public class DisposableIndexSearcher<T> : DisposableIndexSearcher where T : class
+    {
+        internal DisposableIndexSearcher(IDisposable readLock, LockableIndexSearcher indexSearcher) : base(readLock, indexSearcher)
+        {
         }
 
         public T GetRecord(int doc)
