@@ -60,7 +60,7 @@
           </imports>
           <attributes>
             <attribute type="AssemblyProductAttribute" value="${project::get-name()}"/>
-            <attribute type="AssemblyCopyrightAttribute" value="Copyright ©  2010-2011"/>
+            <attribute type="AssemblyCopyrightAttribute" value="Copyright ©  2010-2012"/>
             <attribute type="AssemblyVersionAttribute" value="${product.version}"/>
             <attribute type="AssemblyFileVersionAttribute" value="${product.version}"/>
             <attribute type="AssemblyInformationalVersionAttribute" value="${product.major}.${product.minor}"/>
