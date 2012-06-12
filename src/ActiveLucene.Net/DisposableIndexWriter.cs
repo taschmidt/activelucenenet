@@ -61,7 +61,7 @@ namespace ActiveLucene.Net
         public void AddRecord<T>(T record, Analyzer analyzer) where T : class
         {
             LuceneMediator<T>.ToDocument(_document, record);
-            base.AddDocument(_document);
+            base.AddDocument(_document, analyzer);
         }
     }
 

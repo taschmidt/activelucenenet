@@ -72,7 +72,7 @@ namespace ActiveLucene.Net
         private readonly bool _readOnly;
         private LockableIndexSearcher _indexSearcher;
 
-        public IndexManager(string basePath) : this(basePath, new StandardAnalyzer(Version.LUCENE_CURRENT), false)
+        public IndexManager(string basePath) : this(basePath, new StandardAnalyzer(Version.LUCENE_29), false)
         {}
 
         public IndexManager(string basePath, Analyzer analyzer) : this(basePath, analyzer, false)
