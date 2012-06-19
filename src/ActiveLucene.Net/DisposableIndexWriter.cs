@@ -24,7 +24,6 @@ namespace ActiveLucene.Net
     {
         private readonly Action _onExit;
         private IDisposable _writeLock;
-        protected readonly Document _document = new Document();
 
         internal DisposableIndexWriter(IDisposable writeLock, LockableIndexSearcher indexSearcher, Analyzer analyzer, Action onExit)
             : base(indexSearcher.GetIndexReader().Directory(), analyzer, MaxFieldLength.LIMITED)
@@ -54,14 +53,12 @@ namespace ActiveLucene.Net
 
         public void AddRecord<T>(T record) where T : class
         {
-            LuceneMediator<T>.ToDocument(_document, record);
-            base.AddDocument(_document);
+            base.AddDocument(LuceneMediator<T>.ToDocument(record));
         }
 
         public void AddRecord<T>(T record, Analyzer analyzer) where T : class
         {
-            LuceneMediator<T>.ToDocument(_document, record);
-            base.AddDocument(_document, analyzer);
+            base.AddDocument(LuceneMediator<T>.ToDocument(record), analyzer);
         }
     }
 
@@ -74,14 +71,12 @@ namespace ActiveLucene.Net
 
         public void AddRecord(T record)
         {
-            LuceneMediator<T>.ToDocument(_document, record);
-            base.AddDocument(_document);
+            base.AddDocument(LuceneMediator<T>.ToDocument(record));
         }
 
         public void AddRecord(T record, Analyzer analyzer)
         {
-            LuceneMediator<T>.ToDocument(_document, record);
-            base.AddDocument(_document, analyzer);
+            base.AddDocument(LuceneMediator<T>.ToDocument(record), analyzer);
         }
     }
 }
