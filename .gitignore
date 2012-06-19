@@ -4,3 +4,4 @@ src/**/obj
 *.suo
 _ReSharper*
 build
+gcpwd.txt
