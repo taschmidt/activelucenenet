@@ -157,9 +157,9 @@ namespace ActiveLucene.Net
 
         public int GetIndexCount()
         {
-            using(var searcher = GetIndexSearcher())
+            using (var searcher = GetIndexSearcher())
             {
-                return searcher.MaxDoc();
+                return searcher.GetIndexReader().NumDocs();
             }
         }
 
