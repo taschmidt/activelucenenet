@@ -16,7 +16,7 @@
   <Import Project="$(MSBuildProjectDirectory)\MSBuild.Community.Tasks.Targets" />
 
   <ItemGroup>
-    <NUnitAssemblies Include="$(ArtifactsDir)\*.Tests.dll"/>
+    <NUnitAssemblies Include="$(ArtifactsDir)\ActiveLucene.Net.Tests\ActiveLucene.Net.Tests.dll"/>
     <NuGetManifests Include="$(SourceDir)\*.nuspec"/>
     
     <BuildProjects Include="$(SourceDir)\ActiveLucene.Net\ActiveLucene.Net.csproj"/>
@@ -30,7 +30,6 @@
   </Target>
   
   <Target Name="Build" DependsOnTargets="Clean">
-    <Message Text="Build number: $(BuildNumber)"/>
     <MSBuild Projects="@(BuildProjects)" Properties="OutDir=$(ArtifactsDir)\%(BuildProjects.Filename);Configuration=$(Configuration);"/>
   </Target>
 
@@ -98,5 +97,5 @@
   
   <Target Name="Package" DependsOnTargets="PackageZip; PackageNuGet;"/>
   
-  <Target Name="Go" DependsOnTargets="Build; Package;"/>
+  <Target Name="Go" DependsOnTargets="Build; Test; Package;"/>
 </Project>
