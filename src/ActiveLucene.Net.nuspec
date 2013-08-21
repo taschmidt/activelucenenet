@@ -3,8 +3,8 @@
   <metadata>
     <id>ActiveLucene.Net</id>
     <version>1.0</version>
-    <authors>Tim Schmidt; Kevin Dotzenrod</authors>
-    <owners>Tim Schmidt; Kevin Dotzenrod</owners>
+    <authors>Tim Schmidt, Kevin Dotzenrod</authors>
+    <owners>Tim Schmidt, Kevin Dotzenrod</owners>
     <!--
     <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
     <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>

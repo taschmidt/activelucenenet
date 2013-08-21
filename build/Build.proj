@@ -83,6 +83,18 @@
                BasePath="@(NuGetManifests->'%(RootDir)%(Directory)')"
                Verbose="true"/>
   </Target>
+
+  <Target Name="GoNuGet" DependsOnTargets="Go">
+    <Prompt Text="Enter NuGet API key:">
+      <Output TaskParameter="UserInput" PropertyName="NuGetApiKey"/>
+    </Prompt>
+
+    <ItemGroup>
+      <NuGetPackages Include="$(DistDir)\*.nupkg"/>
+    </ItemGroup>
+    
+    <NuGetPush APIKey="$(NuGetApiKey)" File="%(NuGetPackages.FullPath)" ToolPath="$(NuGetDir)"/>
+  </Target>
   
   <Target Name="Package" DependsOnTargets="PackageZip; PackageNuGet;"/>
   
