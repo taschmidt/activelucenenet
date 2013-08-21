@@ -20,7 +20,6 @@ namespace ActiveLucene.Net
     {
         Store,
         DoNotStore,
-        Compress
     }
 
     public enum IndexBehavior

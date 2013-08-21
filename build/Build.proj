@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Go" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <ProjectName>ActiveLucene.Net</ProjectName>
+    <Configuration Condition="$(Configuration) == ''">Release</Configuration>
+    <ProjectRoot>$(MSBuildProjectDirectory)\..</ProjectRoot>
+    <ArtifactsDir>$(ProjectRoot)\artifacts\$(Configuration)</ArtifactsDir>
+    <DistDir>$(ArtifactsDir)\dist</DistDir>
+    <SourceDir>$(ProjectRoot)\src</SourceDir>
+    <ToolsDir>$(ProjectRoot)\tools\</ToolsDir>
+    <WebsitesDir>$(ArtifactsDir)\_PublishedWebsites</WebsitesDir>
+    <MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)</MSBuildCommunityTasksPath>
+    <NUnitDir>$(SourceDir)\packages\NUnit.Runners.2.6.2\tools</NUnitDir>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildProjectDirectory)\MSBuild.Community.Tasks.Targets" />
+
+  <ItemGroup>
+    <NUnitAssemblies Include="$(ArtifactsDir)\*.Tests.dll"/>
+  </ItemGroup>
+  
+  <Target Name="Clean">
+    <RemoveDir Directories="$(ArtifactsDir)" Condition="Exists('$(ArtifactsDir)')" ContinueOnError="true"/>
+    <MakeDir Directories="$(ArtifactsDir)"/>
+    <MakeDir Directories="$(DistDir)" Condition="$(DistDir) != ''"/>
+  </Target>
+  
+  <Target Name="Build" DependsOnTargets="Clean">
+    <Message Text="Build number: $(BuildNumber)"/>
+    <Message Text="Branch name: $(git_branch)"/>
+    <MSBuild Projects="$(SourceDir)\Mystique.sln" Properties="OutDir=$(ArtifactsDir);Configuration=$(Configuration);"/>
+  </Target>
+
+  <Target Name="VersionInfo" BeforeTargets="Build">
+    <Version Major="0" Minor="3" BuildType="Automatic" RevisionType="Automatic" StartDate="4/6/2010">
+      <Output TaskParameter="Major" PropertyName="Major"/>
+      <Output TaskParameter="Minor" PropertyName="Minor"/>
+      <Output TaskParameter="Build" PropertyName="Build"/>
+      <Output TaskParameter="Revision" PropertyName="Revision"/>
+    </Version>
+
+    <PropertyGroup>
+      <Version>$(Major).$(Minor).$(Build).$(Revision)</Version>
+    </PropertyGroup>
+    
+    <Message Text="Version: $(Version)"/>
+    
+    <AssemblyInfo CodeLanguage="CS"
+                  OutputFile="$(SourceDir)\CommonAssemblyInfo.cs"
+                  AssemblyVersion="$(Version)"
+                  AssemblyFileVersion="$(Version)"
+                  AssemblyInformationalVersion="$(Major).$(Minor)"
+                  AssemblyCopyright="Copyright (c) $([System.DateTime]::Now.Year)"
+                  AssemblyProduct="$(ProjectName)"
+                  AssemblyDescription="Built $([System.DateTime]::Now)"/>
+  </Target>
+
+  <Target Name="Test" Inputs="@(NUnitAssemblies)" Outputs="$(ArtifactsDir)\Test.Results.xml">
+    <NUnit Assemblies="@(NUnitAssemblies)" OutputXmlFile="$(ArtifactsDir)\Test.Results.xml" ToolPath="$(NUnitDir)"/>
+  </Target>
+
+  <Target Name="Package">
+    
+  </Target>
+  
+  <Target Name="Go" DependsOnTargets="Build; Package;"/>
+</Project>

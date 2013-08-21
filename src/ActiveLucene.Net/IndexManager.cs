@@ -112,9 +112,9 @@ namespace ActiveLucene.Net
             {
                 var buildingPath = Path.Combine(_basePath, "building" + Guid.NewGuid().ToString("n"));
 
-                var writer = new IndexWriter(FSDirectory.Open(new DirectoryInfo(buildingPath)),
-                    _analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
-                writer.Close();
+                using (new IndexWriter(FSDirectory.Open(new DirectoryInfo(buildingPath)),
+                                       _analyzer, true, IndexWriter.MaxFieldLength.LIMITED))
+                {}
 
                 var indexSearcher = new LockableIndexSearcher(buildingPath, false);
                 using (var indexWriter = GetIndexWriter<object>(indexSearcher, Timeout.Infinite, null))
@@ -159,7 +159,7 @@ namespace ActiveLucene.Net
         {
             using (var searcher = GetIndexSearcher())
             {
-                return searcher.GetIndexReader().NumDocs();
+                return searcher.IndexReader.NumDocs();
             }
         }
 
@@ -167,7 +167,7 @@ namespace ActiveLucene.Net
         {
             using(var searcher = GetIndexSearcher())
             {
-                var directory = searcher.GetIndexReader().Directory();
+                var directory = searcher.IndexReader.Directory();
                 return directory.ListAll().Sum(file => new FileInfo(Path.Combine(CurrentIndexPath, file)).Length);
             }
         }
@@ -189,7 +189,7 @@ namespace ActiveLucene.Net
             {
                 using (_indexSearcher.GetWriteLock())
                 {
-                    _indexSearcher.Close();
+                    _indexSearcher.Dispose();
                 }
 
                 _indexSearcher = null;
@@ -198,7 +198,7 @@ namespace ActiveLucene.Net
 
         public void VerifyReader()
         {
-            if (!IsOpen || !_indexSearcher.GetIndexReader().IsCurrent())
+            if (!IsOpen || !_indexSearcher.IndexReader.IsCurrent())
                 OpenBestRepository();
         }
 
@@ -206,9 +206,10 @@ namespace ActiveLucene.Net
         {
             lock (_maintenanceLock)
             {
-                var writer = new IndexWriter(FSDirectory.Open(new DirectoryInfo(NextHighestNumberedFolder())),
-                                             _analyzer, true, IndexWriter.MaxFieldLength.LIMITED);
-                writer.Close();
+                using (new IndexWriter(FSDirectory.Open(new DirectoryInfo(NextHighestNumberedFolder())),
+                                       _analyzer, true, IndexWriter.MaxFieldLength.LIMITED))
+                {}
+
                 OpenBestRepository();
             }
         }
@@ -251,7 +252,7 @@ namespace ActiveLucene.Net
                 {
                     using(oldIndexSearcher.GetWriteLock())
                     {
-                        oldIndexSearcher.Close();
+                        oldIndexSearcher.Dispose();
                     }
                 }
 

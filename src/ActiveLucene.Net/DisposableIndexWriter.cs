@@ -26,7 +26,7 @@ namespace ActiveLucene.Net
         private IDisposable _writeLock;
 
         internal DisposableIndexWriter(IDisposable writeLock, LockableIndexSearcher indexSearcher, Analyzer analyzer, Action onExit)
-            : base(indexSearcher.GetIndexReader().Directory(), analyzer, MaxFieldLength.LIMITED)
+            : base(indexSearcher.IndexReader.Directory(), analyzer, MaxFieldLength.LIMITED)
         {
             _onExit = onExit;
             _writeLock = writeLock;
@@ -39,16 +39,15 @@ namespace ActiveLucene.Net
 
         public new void Dispose()
         {
-            if (_writeLock != null)
-            {
-                Close();
+            if (_writeLock == null) return;
+            
+            base.Dispose();
 
-                if (_onExit != null)
-                    _onExit();
+            if (_onExit != null)
+                _onExit();
 
-                _writeLock.Dispose();
-                _writeLock = null;
-            }
+            _writeLock.Dispose();
+            _writeLock = null;
         }
 
         public void AddRecord<T>(T record) where T : class

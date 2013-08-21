@@ -18,7 +18,6 @@ using System.Threading;
 using ActiveLucene.Net;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
-using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Version = Lucene.Net.Util.Version;
@@ -28,7 +27,7 @@ namespace IndexManagerTester
     class Program
     {
         private static IndexManager<TestRecord> _indexManager;
-        private static readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        private static readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_30);
         private static bool _done;
         private static readonly Random _random = new Random();
 
@@ -77,7 +76,7 @@ namespace IndexManagerTester
 
         static void SearcherProc()
         {
-            var parser = new QueryParser(Version.LUCENE_CURRENT, "test-field", _analyzer);
+            var parser = new QueryParser(Version.LUCENE_30, "test-field", _analyzer);
 
             while (!_done)
             {
@@ -121,10 +120,11 @@ namespace IndexManagerTester
                     Console.WriteLine("\nOptimizing...");
                     using (var searcher = _indexManager.GetIndexSearcher())
                     {
-                        var writer = new IndexWriter(searcher.GetIndexReader().Directory(), null, IndexWriter.MaxFieldLength.LIMITED);
-                        writer.Optimize();
-                        Thread.Sleep(TimeSpan.FromSeconds(15));
-                        writer.Close();
+                        using (var writer = new IndexWriter(searcher.IndexReader.Directory(), null, IndexWriter.MaxFieldLength.LIMITED))
+                        {
+                            writer.Optimize();
+                            Thread.Sleep(TimeSpan.FromSeconds(15));
+                        }
                     }
                     Console.WriteLine("\nOptimization complete.");
                 }

@@ -13,25 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.IO;
-using Lucene.Net.Analysis;
 using Lucene.Net.Documents;
 
 namespace ActiveLucene.Net
 {
     public static class LuceneHelpers
     {
-        public static string Parse(this Analyzer analyzer, string s)
-        {
-            var reader = new StringReader(s);
-            var stream = analyzer.TokenStream(null, reader);
-            if (stream == null)
-                return s;
-
-            var token = stream.Next();
-            return token == null ? s : token.TermText();
-        }
-
         public static int GetInt32(this Document doc, string name)
         {
             return GetNullableInt32(doc, name).GetValueOrDefault();

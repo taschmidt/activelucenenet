@@ -17,7 +17,6 @@ using System.IO;
 using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
-using Lucene.Net.Index;
 using NUnit.Framework;
 using Version = Lucene.Net.Util.Version;
 
@@ -27,7 +26,7 @@ namespace ActiveLucene.Net.Tests
     public class IndexManagerTests
     {
         private readonly string _basePath = Path.Combine(Environment.CurrentDirectory, "index");
-        private readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_CURRENT);
+        private readonly Analyzer _analyzer = new StandardAnalyzer(Version.LUCENE_30);
 
         private IndexManager<object> GetOpenIndexManager()
         {
@@ -84,7 +83,7 @@ namespace ActiveLucene.Net.Tests
 
             using(var indexSearcher = indexManager.GetIndexSearcher())
             {
-                Assert.AreEqual(indexSearcher.MaxDoc(), 1);
+                Assert.AreEqual(indexSearcher.MaxDoc, 1);
                 var doc = indexSearcher.Doc(0);
                 Assert.AreEqual(doc.Get("rebuilding"), "yes");
             }
@@ -108,7 +107,7 @@ namespace ActiveLucene.Net.Tests
 
             using (var indexSearcher = indexManager.GetIndexSearcher())
             {
-                Assert.AreEqual(indexSearcher.MaxDoc(), 1);
+                Assert.AreEqual(indexSearcher.MaxDoc, 1);
                 var obj = LuceneMediator<TestRecord>.ToRecord(indexSearcher.Doc(0));
                 Assert.AreEqual(obj.Data, "foo");
                 Assert.AreEqual(obj.Data2, "bar");
@@ -133,7 +132,7 @@ namespace ActiveLucene.Net.Tests
 
             using (var indexSearcher = indexManager.GetIndexSearcher())
             {
-                Assert.AreEqual(indexSearcher.MaxDoc(), 1);
+                Assert.AreEqual(indexSearcher.MaxDoc, 1);
                 var obj = indexManager.GetRecord(0);
                 Assert.AreEqual(obj.Data, "foo");
                 Assert.AreEqual(obj.Data2, "bar");
@@ -154,7 +153,7 @@ namespace ActiveLucene.Net.Tests
                                                     {
                                                         throw new Exception("Test");
                                                     };
-            Assert.That(new TestDelegate(() => indexManager.RebuildRepository(null)), Throws.Nothing);
+            Assert.That(() => indexManager.RebuildRepository(null), Throws.Nothing);
 
             Assert.IsTrue(indexManager.CurrentIndexPath.EndsWith("1"));
 

@@ -45,8 +45,6 @@ namespace ActiveLucene.Net.FieldHandler
         {
             switch (storageBehavior)
             {
-                case StorageBehavior.Compress:
-                    return Field.Store.COMPRESS;
                 case StorageBehavior.DoNotStore:
                     return Field.Store.NO;
                 case StorageBehavior.Store:

@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{49175E57-53D2-4064-A514-C73A1222F4DF}"
 	ProjectSection(SolutionItems) = preProject
+		..\build\Build.proj = ..\build\Build.proj
 		CommonAssemblyInfo.cs = CommonAssemblyInfo.cs
 	EndProjectSection
 EndProject
@@ -11,6 +12,11 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiveLucene.Net", "ActiveLucene.Net\ActiveLucene.Net.csproj", "{B0D7D075-22B8-4965-AE89-0A0E8423A15C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiveLucene.Net.Tests", "ActiveLucene.Net.Tests\ActiveLucene.Net.Tests.csproj", "{0D951B40-2581-4BB5-A979-17C1ABE900DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{EE30EAEC-C29E-4E43-8E6D-ED18ACA1A106}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

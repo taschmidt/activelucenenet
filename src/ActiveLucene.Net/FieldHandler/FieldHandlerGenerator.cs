@@ -100,13 +100,13 @@ namespace ActiveLucene.Net.FieldHandler
 
                     if (propertyInfo.PropertyType != typeof(float))
                     {
-                        documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = ({1})Convert.ChangeType(doc.GetBoost(), typeof({1}));", propertyInfo.Name, propertyInfo.PropertyType)));
-                        recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\tdoc.SetBoost(Convert.ToSingle(record.{0}));", propertyInfo.Name)));
+                        documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = ({1})Convert.ChangeType(doc.Boost, typeof({1}));", propertyInfo.Name, propertyInfo.PropertyType)));
+                        recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\tdoc.Boost = Convert.ToSingle(record.{0});", propertyInfo.Name)));
                     }
                     else
                     {
-                        documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = doc.GetBoost();", propertyInfo.Name)));
-                        recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\tdoc.SetBoost(record.{0});", propertyInfo.Name)));
+                        documentToRecordMethod.Statements.Add(new CodeSnippetStatement(String.Format("\trecord.{0} = doc.Boost;", propertyInfo.Name)));
+                        recordToDocumentMethod.Statements.Add(new CodeSnippetStatement(String.Format("\tdoc.Boost = record.{0};", propertyInfo.Name)));
                     }
 
                     docBoostProperty = true;
@@ -150,7 +150,7 @@ namespace ActiveLucene.Net.FieldHandler
 
             var prov = new CSharpCodeProvider(new Dictionary<string, string>
                                                   {
-                                                      {"CompilerVersion", "v3.5"}
+                                                      {"CompilerVersion", "v4.0"}
                                                   });
             var sb = new StringBuilder();
             using(var writer = new StringWriter(sb))

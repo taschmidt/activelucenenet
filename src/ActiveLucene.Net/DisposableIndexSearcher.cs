@@ -22,7 +22,7 @@ namespace ActiveLucene.Net
         private IDisposable _readLock;
 
         internal DisposableIndexSearcher(IDisposable readLock, LockableIndexSearcher indexSearcher)
-            : base(indexSearcher.GetIndexReader())
+            : base(indexSearcher.IndexReader)
         {
             _readLock = readLock;
         }
@@ -34,12 +34,11 @@ namespace ActiveLucene.Net
 
         public new void Dispose()
         {
-            if (_readLock != null)
-            {
-                Close();
-                _readLock.Dispose();
-                _readLock = null;
-            }
+            if (_readLock == null) return;
+
+            base.Dispose();
+            _readLock.Dispose();
+            _readLock = null;
         }
 
         public T GetRecord<T>(int doc) where T : class

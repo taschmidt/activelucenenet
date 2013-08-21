@@ -49,8 +49,8 @@ namespace ActiveLucene.Net.Tests
                      doc =>
                          {
                              var obj = new TestRecord();
-                             dataProp.SetValue(obj, dataField.StringValue(), null);
-                             data2Prop.SetValue(obj, data2Field.StringValue(), null);
+                             dataProp.SetValue(obj, dataField.StringValue, null);
+                             data2Prop.SetValue(obj, data2Field.StringValue, null);
                              return obj;
                          });
         }

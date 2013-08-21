@@ -144,7 +144,7 @@ namespace ActiveLucene.Net.Tests
         {
             var obj = new TestRecord {Data = "foo"};
             var doc = LuceneMediator<TestRecord>.ToDocument(obj);
-            Assert.That(!doc.GetFields().Cast<Field>().Any(f => f.Name() == "data2"));
+            Assert.That(doc.GetFields().Cast<Field>().All(f => f.Name != "data2"));
         }
 
         [Test]
@@ -152,7 +152,7 @@ namespace ActiveLucene.Net.Tests
         {
             var obj = new TestRecord {Boost = 2.0f};
             var doc = LuceneMediator<TestRecord>.ToDocument(obj);
-            Assert.That(doc.GetBoost(), Is.EqualTo(2.0f));
+            Assert.That(doc.Boost, Is.EqualTo(2.0f));
 
             var obj2 = LuceneMediator<TestRecord>.ToRecord(doc);
             Assert.That(obj2.Boost, Is.EqualTo(2.0f));
@@ -163,7 +163,7 @@ namespace ActiveLucene.Net.Tests
         {
             var obj = new BooleanRecord {Boost = "2"};
             var doc = LuceneMediator<BooleanRecord>.ToDocument(obj);
-            Assert.That(doc.GetBoost(), Is.EqualTo(2.0f));
+            Assert.That(doc.Boost, Is.EqualTo(2.0f));
 
             var obj2 = LuceneMediator<BooleanRecord>.ToRecord(doc);
             Assert.That(obj2.Boost, Is.EqualTo("2"));
