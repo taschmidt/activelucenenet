@@ -56,6 +56,10 @@
                   AssemblyDescription="Built $([System.DateTime]::Now)"/>
   </Target>
 
+  <Target Name="RevertAssemblyInfo" AfterTargets="Build">
+    <GitClient Command="checkout" Arguments="-- $(SourceDir)\CommonAssemblyInfo.cs"/>
+  </Target>
+  
   <Target Name="Test" Inputs="@(NUnitAssemblies)" Outputs="$(ArtifactsDir)\Test.Results.xml">
     <NUnit Assemblies="@(NUnitAssemblies)" OutputXmlFile="$(ArtifactsDir)\Test.Results.xml" ToolPath="$(NUnitDir)"/>
   </Target>
