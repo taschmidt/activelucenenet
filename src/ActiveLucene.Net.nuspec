@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>ActiveLucene.Net</id>
+    <version>1.0</version>
+    <authors>Tim Schmidt; Kevin Dotzenrod</authors>
+    <owners>Tim Schmidt; Kevin Dotzenrod</owners>
+    <!--
+    <projectUrl>http://PROJECT_URL_HERE_OR_DELETE_THIS_LINE</projectUrl>
+    <iconUrl>http://ICON_URL_HERE_OR_DELETE_THIS_LINE</iconUrl>
+-->
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>ActiveLucene.Net is a collection of classes to facilitate developing with Lucene.Net. At its core is the ability to easily and automatically convert between a Lucene Document object and a POCO through the use of attributes.</description>
+    <tags>Lucene POCO</tags>
+    <dependencies>
+      <dependency id="Lucene.Net" version="3.0.3"/>
+    </dependencies>
+  </metadata>
+
+  <files>
+    <file src="$OutDir$\ActiveLucene.Net.*" target="lib\net40"/>
+  </files>
+</package>

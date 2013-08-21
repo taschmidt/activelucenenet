@@ -18,6 +18,9 @@
   <ItemGroup>
     <NUnitAssemblies Include="$(ArtifactsDir)\*.Tests.dll"/>
     <NuGetManifests Include="$(SourceDir)\*.nuspec"/>
+    
+    <BuildProjects Include="$(SourceDir)\ActiveLucene.Net\ActiveLucene.Net.csproj"/>
+    <BuildProjects Include="$(SourceDir)\ActiveLucene.Net.Tests\ActiveLucene.Net.Tests.csproj"/>
   </ItemGroup>
   
   <Target Name="Clean">
@@ -28,8 +31,7 @@
   
   <Target Name="Build" DependsOnTargets="Clean">
     <Message Text="Build number: $(BuildNumber)"/>
-    <Message Text="Branch name: $(git_branch)"/>
-    <MSBuild Projects="$(SourceDir)\ActiveLucene.Net.sln" Properties="OutDir=$(ArtifactsDir);Configuration=$(Configuration);"/>
+    <MSBuild Projects="@(BuildProjects)" Properties="OutDir=$(ArtifactsDir)\%(BuildProjects.Filename);Configuration=$(Configuration);"/>
   </Target>
 
   <Target Name="VersionInfo" BeforeTargets="Build">
@@ -64,7 +66,15 @@
     <NUnit Assemblies="@(NUnitAssemblies)" OutputXmlFile="$(ArtifactsDir)\Test.Results.xml" ToolPath="$(NUnitDir)"/>
   </Target>
 
-  <Target Name="Package" Inputs="@(NuGetManifests)" Outputs="@(NuGetManifests->'$(DistDir)\%(Filename).$(Version).nupkg')">
+  <ItemGroup>
+    <ZipFiles Include="$(ArtifactsDir)\ActiveLucene.Net\ActiveLucene.Net.*"/>
+  </ItemGroup>
+
+  <Target Name="PackageZip" Inputs="@(ZipFiles)" Outputs="$(DistDir)\ActiveLucene.Net.$(Version).zip">
+    <Zip Files="@(ZipFiles)" ZipFileName="$(DistDir)\ActiveLucene.Net.$(Version).zip" WorkingDirectory="$(ArtifactsDir)\ActiveLucene.Net"/>
+  </Target>
+  
+  <Target Name="PackageNuGet" Inputs="@(NuGetManifests)" Outputs="@(NuGetManifests->'$(DistDir)\%(Filename).$(Version).nupkg')">
     <NuGetPack File="%(NuGetManifests.Identity)"
                OutputDirectory="$(DistDir)"
                ToolPath="$(NuGetDir)"
@@ -73,6 +83,8 @@
                BasePath="@(NuGetManifests->'%(RootDir)%(Directory)')"
                Verbose="true"/>
   </Target>
+  
+  <Target Name="Package" DependsOnTargets="PackageZip; PackageNuGet;"/>
   
   <Target Name="Go" DependsOnTargets="Build; Package;"/>
 </Project>
