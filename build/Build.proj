@@ -8,16 +8,16 @@
     <ArtifactsDir>$(ProjectRoot)\artifacts\$(Configuration)</ArtifactsDir>
     <DistDir>$(ArtifactsDir)\dist</DistDir>
     <SourceDir>$(ProjectRoot)\src</SourceDir>
-    <ToolsDir>$(ProjectRoot)\tools\</ToolsDir>
-    <WebsitesDir>$(ArtifactsDir)\_PublishedWebsites</WebsitesDir>
     <MSBuildCommunityTasksPath>$(MSBuildProjectDirectory)</MSBuildCommunityTasksPath>
     <NUnitDir>$(SourceDir)\packages\NUnit.Runners.2.6.2\tools</NUnitDir>
+    <NuGetDir>$(SourceDir)\packages\NuGet.CommandLine.2.6.1\tools</NuGetDir>
   </PropertyGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\MSBuild.Community.Tasks.Targets" />
 
   <ItemGroup>
     <NUnitAssemblies Include="$(ArtifactsDir)\*.Tests.dll"/>
+    <NuGetManifests Include="$(SourceDir)\*.nuspec"/>
   </ItemGroup>
   
   <Target Name="Clean">
@@ -64,8 +64,14 @@
     <NUnit Assemblies="@(NUnitAssemblies)" OutputXmlFile="$(ArtifactsDir)\Test.Results.xml" ToolPath="$(NUnitDir)"/>
   </Target>
 
-  <Target Name="Package">
-    
+  <Target Name="Package" Inputs="@(NuGetManifests)" Outputs="@(NuGetManifests->'$(DistDir)\%(Filename).$(Version).nupkg')">
+    <NuGetPack File="%(NuGetManifests.Identity)"
+               OutputDirectory="$(DistDir)"
+               ToolPath="$(NuGetDir)"
+               Version="$(Version)"
+               Properties="OutDir=$([System.IO.Path]::GetFullPath('$(ArtifactsDir)\%(NuGetManifests.Filename)'));ArtifactsDir=$([System.IO.Path]::GetFullPath($(ArtifactsDir)));RootDir=$([System.IO.Path]::GetFullPath($(ProjectRoot)));"
+               BasePath="@(NuGetManifests->'%(RootDir)%(Directory)')"
+               Verbose="true"/>
   </Target>
   
   <Target Name="Go" DependsOnTargets="Build; Package;"/>
