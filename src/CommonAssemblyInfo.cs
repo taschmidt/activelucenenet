@@ -8,11 +8,11 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-[assembly: System.Reflection.AssemblyVersion("0.3.1233.18853")]
-[assembly: System.Reflection.AssemblyFileVersion("0.3.1233.18853")]
-[assembly: System.Reflection.AssemblyInformationalVersion("0.3")]
+[assembly: System.Reflection.AssemblyVersion("1.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersion("1.0")]
 [assembly: System.Reflection.AssemblyCopyright("Copyright (c) 2013")]
 [assembly: System.Reflection.AssemblyProduct("ActiveLucene.Net")]
-[assembly: System.Reflection.AssemblyDescription("Built 8/21/2013 6:54:15 AM")]
+[assembly: System.Reflection.AssemblyDescription("Built 8/21/2013 7:20:45 AM")]
 
 

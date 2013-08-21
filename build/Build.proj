@@ -29,7 +29,7 @@
   <Target Name="Build" DependsOnTargets="Clean">
     <Message Text="Build number: $(BuildNumber)"/>
     <Message Text="Branch name: $(git_branch)"/>
-    <MSBuild Projects="$(SourceDir)\Mystique.sln" Properties="OutDir=$(ArtifactsDir);Configuration=$(Configuration);"/>
+    <MSBuild Projects="$(SourceDir)\ActiveLucene.Net.sln" Properties="OutDir=$(ArtifactsDir);Configuration=$(Configuration);"/>
   </Target>
 
   <Target Name="VersionInfo" BeforeTargets="Build">
